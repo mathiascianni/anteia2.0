@@ -5,7 +5,7 @@ const MainRoutes = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<MainLayout><div>Home</div></MainLayout>} />
+        <Route path="/" element={<MainLayout><div>esto es una verga</div></MainLayout>} />
       </Routes>
     </>
   )
