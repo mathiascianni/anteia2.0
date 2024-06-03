@@ -18,7 +18,7 @@ export const navLinks = [
     },
     {
         title: "Perfil",
-        path: "/",
+        path: "/profile",
         icon: User
     },
     {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Input from '../components/Auth/Input';
 import Checkbox from '../components/Auth/Checkbox';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'; // Agrega updateProfile
 import { auth } from '../credentials';
 
 const Register = () => {
@@ -44,9 +44,10 @@ const Register = () => {
         try {
             setLoading(true);
             setError("");
-
-            await createUserWithEmailAndPassword(auth, email, password);
-
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(userCredential.user, {
+                displayName: username
+            });
             setUsername("");
             setEmail("");
             setPassword("");
@@ -99,7 +100,7 @@ const Register = () => {
                 {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                 <label className="my-8">
                     ¿Ya tienes una cuenta?{" "}
-                    <span className="text-primary font-bold">Inicia sesión</span>
+                    <span onClick={() => window.location.href = "/login"} className="text-primary font-bold">Inicia sesión</span>
                 </label>
             </div>
         </div>
