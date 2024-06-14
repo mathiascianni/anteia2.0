@@ -46,7 +46,8 @@ const Register = () => {
             setError("");
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, {
-                displayName: username
+                displayName: username,
+                photoURL: "assets/user/avatar.png",
             });
             setUsername("");
             setEmail("");

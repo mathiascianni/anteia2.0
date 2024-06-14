@@ -4,6 +4,7 @@ import Checkbox from '../components/Auth/Checkbox';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../credentials';
 import { useNavigate } from 'react-router-dom';
+import Modal from '../components/Modal/Modal';
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -41,6 +42,7 @@ const Login = () => {
     };
 
     return (
+        
         <div className='mt-7'>
             <h1 className='text-2xl text-center'>Iniciar sesión</h1>
             <div className='mt-5 w-[90%] gap-6 flex flex-col mx-auto'>
