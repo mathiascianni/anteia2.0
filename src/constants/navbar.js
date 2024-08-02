@@ -23,7 +23,7 @@ export const navLinks = [
     },
     {
         title: "Opciones",
-        path: "/",
+        path: "/options",
         icon: Gear
     },
 ]
