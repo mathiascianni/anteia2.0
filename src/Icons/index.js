@@ -6,6 +6,7 @@ import Home from "./Home";
 import User from "./User";
 import Menu from "./Menu";
 import AnteiaLogo from "./AnteiaLogo";
+import EditIcon from "./EditIcon";
 
 export {
     Heart,
@@ -15,5 +16,6 @@ export {
     Home,
     User,
     Menu,
-    AnteiaLogo
+    AnteiaLogo,
+    EditIcon
 }

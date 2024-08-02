@@ -4,7 +4,7 @@ import Checkbox from '../components/Auth/Checkbox';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../credentials';
 import { useNavigate } from 'react-router-dom';
-import Modal from '../components/Modal/Modal';
+import Button from '../components/Auth/Button';
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -20,7 +20,7 @@ const Login = () => {
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);
     };
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!email || !password) {
@@ -42,25 +42,24 @@ const Login = () => {
     };
 
     return (
-        
+
         <div className='mt-7'>
             <h1 className='text-2xl text-center'>Iniciar sesión</h1>
+            <form onSubmit={handleSubmit}>
             <div className='mt-5 w-[90%] gap-6 flex flex-col mx-auto'>
-                <Input title="Email" type="email" value={email} onChange={handleEmailChange} />
-                <Input title="Contraseña" type="password" value={password} onChange={handlePasswordChange} />
+                
+                    <Input title="Email" type="email" value={email} onChange={handleEmailChange} />
+                    <Input title="Contraseña" type="password" value={password} onChange={handlePasswordChange} />
+                
                 <label className='text-primary text-sm'>¿Olvidaste tu contraseña?</label>
             </div>
+            </form>
             <Checkbox text="Mantener sesión iniciada" />
             <div className='fixed bottom-0 w-full flex flex-col'>
-                <button
-                    className='mx-auto text-white bg-primary px-32 py-4 rounded-lg'
-                    onClick={handleSubmit}
-                    disabled={loading}
-                >
-                    Iniciar sesión
-                </button>
+                <Button text="Iniciar sesión" loading={loading} handleSubmit={handleSubmit} />
                 {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                 <label className='text-center my-8'>¿No tienes una cuenta? <span className='text-primary font-bold'>Crear cuenta</span></label>
+
             </div>
         </div>
     );
