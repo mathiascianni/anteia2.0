@@ -41,20 +41,21 @@ export async function getUserById(userId) {
 }
 
 // Cambia el estado de una insignia especificada para un usuario
-export const completeInsignes = async (userId, insigniaName) => {
+export const completeBadges = async (userId, badgeName) => {
   try {
     const userRef = doc(firestore, "users", userId);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
       const userData = userSnap.data();
-      const currentStatus = userData.insignias && userData.insignias[insigniaName];
+      const currentStatus = userData.badges && userData.badges[badgeName];
 
       await updateDoc(userRef, {
-        [`insignias.${insigniaName}`]: !currentStatus
+        name: badgeName,
+        status: !currentStatus
       });
 
-      console.log(`Insignia '${insigniaName}' actualizada a ${!currentStatus}.`);
+      console.log(`Insignia '${badgeName}' actualizada a ${!currentStatus}.`);
     } else {
       console.log("No se encontró el documento del usuario.");
     }
