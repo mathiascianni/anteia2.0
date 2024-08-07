@@ -1,11 +1,11 @@
 import { Fragment } from "react";
-import { Link } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { Heart } from "../../Icons";
 import { navLinks } from "../../constants/navbar";
 
 const BottomBar = () => {
     return (
-        <div className="py-5 fixed bottom-0 justify-between container mx-auto px-4 w-full flex bg-primary text-light font-body">
+        <div className="py-5 fixed bottom-0 justify-between px-4 w-full flex bg-primary text-light font-body">
             {
                 navLinks.map((item, index) => (
                     <Fragment key={index} >
@@ -15,10 +15,10 @@ const BottomBar = () => {
                                 <p className="sr-only">{item.title}</p>
                             </Link>
                             :
-                            <Link to={item.path} className="flex flex-col items-center justify-center">
+                            <NavLink to={item.path} className="flex flex-col items-center justify-center">
                                 <item.icon />
-                                <p className="uppercase text-xs">{item.title}</p>
-                            </Link>
+                                {/* <p className="uppercase text-xs">{item.title}</p> */}
+                            </NavLink>
                         }
                     </Fragment>
 

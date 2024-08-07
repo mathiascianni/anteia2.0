@@ -5,6 +5,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../credentials';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Auth/Button';
+import { TopBar } from '../components/Navigation';
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -43,8 +44,8 @@ const Login = () => {
 
     return (
 
-        <div className='mt-7'>
-            <h1 className='text-2xl text-center'>Iniciar sesión</h1>
+        <div className=''>
+            <TopBar backBtn={true} title="Iniciar sesión" />
             <form onSubmit={handleSubmit}>
             <div className='mt-5 w-[90%] gap-6 flex flex-col mx-auto'>
                 
@@ -58,7 +59,7 @@ const Login = () => {
             <div className='fixed bottom-0 w-full flex flex-col'>
                 <Button text="Iniciar sesión" loading={loading} handleSubmit={handleSubmit} />
                 {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-                <label className='text-center my-8'>¿No tienes una cuenta? <span className='text-primary font-bold'>Crear cuenta</span></label>
+                <label className='text-center my-8'>¿No tienes una cuenta? <a href='/register' className='text-primary font-bold'>Crear cuenta</a></label>
 
             </div>
         </div>

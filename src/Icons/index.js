@@ -7,6 +7,11 @@ import User from "./User";
 import Menu from "./Menu";
 import AnteiaLogo from "./AnteiaLogo";
 import EditIcon from "./EditIcon";
+import BackBtn from "./BackBtn";
+import Thumb from "./Thumb";
+import Badge from "./Badge";
+import Star from "./Star";
+import EmptyStar from "./EmptyStar";
 
 export {
     Heart,
@@ -17,5 +22,10 @@ export {
     User,
     Menu,
     AnteiaLogo,
-    EditIcon
+    EditIcon,
+    BackBtn,
+    Thumb,
+    Badge,
+    Star,
+    EmptyStar
 }

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { addDataArrayDB, getDataDB } from '../credentials';
 import UserCard from '../components/Home/UserCard';
 import CarrouselGames from '../components/Home/CarrouselGames';
-import Loading from '../components/Navigation/Loading';
+import { SpinnerLoader } from '../components/General';
 import { Link } from 'react-router-dom';
-
+import { TopBar } from '../components/Navigation';
 
 const Home = () => {
   const [users, setUsers] = useState([]);
@@ -28,21 +28,20 @@ const Home = () => {
   }, []);
 
   if (loading) {
-    return <Loading />;
+    return <SpinnerLoader />;
   }
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="mx-auto px-4">
+      <TopBar bell />
       <ul>
         {users.map((user) => (
-          <Link to={`/profile/${user.id}`} className='block'>
+          <Link to={`/profile/${user.id}`} className='block' key={user.id}>
             <UserCard key={user.id} user={user} />
           </Link>
         ))}
       </ul>
-
       <CarrouselGames />
-
     </div>
   );
 };

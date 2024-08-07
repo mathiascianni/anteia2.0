@@ -6,7 +6,6 @@ const MainLayout = ({ children }) => {
   return (
     <>
       {/* <Toast /> */}
-      <TopBar />
       <main className="mb-[120px]">
         {children}
       </main>
