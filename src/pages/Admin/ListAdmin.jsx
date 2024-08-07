@@ -33,9 +33,7 @@ const ListAdmin = ({table, addRoute, editRoute, title, secondTable}) => {
         <h1 className='text-2xl font-bold my-2 '>Administrar {title}</h1>
         <div className='text-xl mb-4'>Lista de {title}</div>
         <div className='mb-6'>
-          <Link to={`/admin/${addRoute}`} className='bg-primary text-white px-4 py-2 text-xs rounded-md'>
-            Crear nuevo {title}
-          </Link>
+          <Link to={`/admin/${addRoute}`} className='bg-primary text-white px-4 py-2 text-xs rounded-md'>{title}</Link>
         </div>
         <div className=''>
         <table className='border-collapse w-full'>

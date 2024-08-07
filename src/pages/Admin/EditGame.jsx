@@ -6,7 +6,7 @@ import { firestore, getDataDB, storage } from '../../credentials';
 import Input from '../../components/Auth/Input';
 import Button from '../../components/Auth/Button';
 import Select from '../../components/Auth/Select';
-import Loading from '../../components/Navigation/Loading';
+import { SpinnerLoader } from '../../components/General';
 
 const EditGame = () => {
   const { uid } = useParams();
@@ -171,7 +171,7 @@ const EditGame = () => {
           </form>
         </>
       ) : (
-        <Loading />
+        <SpinnerLoader />
       )}
     </div>
   );

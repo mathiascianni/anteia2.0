@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { auth, completeInsignes, getUserById, storage, updateAuthUserProfile, updateUserProfile } from '../credentials';
+import { auth, completeBadges, getUserById, storage, updateAuthUserProfile, updateUserProfile } from '../credentials';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import Input from '../components/Auth/Input';
 import Button from '../components/Auth/Button';
-import Loading from '../components/Navigation/Loading';
+import { SpinnerLoader } from '../components/General';
 
 const ProfileEdit = () => {
     const [authUser, setAuthUser] = useState(null);
@@ -69,7 +69,7 @@ const ProfileEdit = () => {
             });
 
             await updateAuthUserProfile(username, profileDownloadURL, email);
-            completeInsignes(authUser.uid, 'primer edit');
+            completeBadges(authUser.uid, 'primer edit');
             console.log('Profile updated successfully!');
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -105,7 +105,7 @@ const ProfileEdit = () => {
                     </form>
                 </>
             ) : (
-                <Loading />
+                <SpinnerLoader />
             )}
         </div>
     );

@@ -1,80 +1,30 @@
 import React, { useState } from 'react';
 import Input from '../components/Auth/Input';
 import Checkbox from '../components/Auth/Checkbox';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { setDoc, doc } from 'firebase/firestore';
-import { auth, firestore } from '../credentials';
+import { TopBar } from '../components/Navigation';
+import useRegister from '../hooks/useRegister';
+
 
 const Register = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const {
+    username,
+    email,
+    password,
+    confirmPassword,
+    error,
+    loading,
+    handleUsernameChange,
+    handleEmailChange,
+    handlePasswordChange,
+    handleConfirmPasswordChange,
+    handleSubmit,
+  } = useRegister();
 
-  const handleUsernameChange = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-  };
-
-  const handleConfirmPasswordChange = (e) => {
-    setConfirmPassword(e.target.value);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!username || !email || !password || !confirmPassword) {
-      setError("Todos los campos son obligatorios.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError("");
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, {
-        displayName: username,
-        photoURL: "assets/user/avatar.png",
-      });
-
-      await setDoc(doc(firestore, "users", userCredential.user.uid), {
-        displayName: username,
-        email: email,
-        insignias: {},
-        games: {},
-        banner: '',
-        photoURL: "https://firebasestorage.googleapis.com/v0/b/anteia-db.appspot.com/o/users%2Favatar.png?alt=media&token=1d387f13-2e06-40a1-966d-bb2c43506d4b",
-        createdAt: new Date(),
-      });
-
-      setUsername("");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
-    <div className="text-center mt-7">
-      <h1 className="text-2xl">Crear Cuenta</h1>
-      {error && <p className="text-red-500 text-sm mt-2 text-start px-8 mt-5">{error}</p>}
+    <div className="">
+      <TopBar backBtn title="Crear cuenta" />
+      {error && <p className="text-red-500 text-sm text-start px-8 mt-5">{error}</p>}
       <div className="my-5 w-[90%] gap-6 flex flex-col mx-auto">
         <Input
           title="Nombre de usuario"
@@ -101,8 +51,9 @@ const Register = () => {
           onChange={handleConfirmPasswordChange}
         />
       </div>
-      <Checkbox text="Acepto los terminos y condiciones" />
       
+      <Checkbox text="Acepto los terminos y condiciones" />
+
       <div className="fixed bottom-0 w-full flex flex-col">
         <button
           className="mx-auto text-white bg-primary px-32 py-4 rounded-lg"
