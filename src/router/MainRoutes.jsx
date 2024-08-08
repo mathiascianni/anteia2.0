@@ -11,15 +11,18 @@ import ProfileEdit from "../pages/ProfileEdit";
 import AddPlans from "../pages/Admin/AddPlans";
 import Options from "../pages/Options";
 import Game from "../pages/Game";
+import MyProfile from "../pages/MyProfile";
 
+//Middlewares
+import IsAuth from "../middlewares/IsAuth";
 
 const MainRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+      <Route path="/" element={<IsAuth><MainLayout><Home /></MainLayout></IsAuth>} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
+      <Route path="/profile" element={<IsAuth><MainLayout><MyProfile /></MainLayout></IsAuth>} />
       <Route path="/profile/edit" element={<MainLayout><ProfileEdit /></MainLayout>} />
       <Route path="/profile/:uid" element={<MainLayout><Profile /></MainLayout>} />
       <Route path="/admin" element={<MainLayout><AdminIndex /></MainLayout>} />

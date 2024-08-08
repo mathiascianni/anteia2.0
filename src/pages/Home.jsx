@@ -5,8 +5,10 @@ import CarrouselGames from '../components/Home/CarrouselGames';
 import { SpinnerLoader } from '../components/General';
 import { Link } from 'react-router-dom';
 import { TopBar } from '../components/Navigation';
+import { getAuth } from 'firebase/auth';
 
 const Home = () => {
+  const auth = getAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,6 +37,7 @@ const Home = () => {
     <div className="mx-auto px-4">
       <TopBar bell />
       <ul>
+        {console.log(auth)}
         {users.map((user) => (
           <Link to={`/profile/${user.id}`} className='block' key={user.id}>
             <UserCard key={user.id} user={user} />

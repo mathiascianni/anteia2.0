@@ -2,7 +2,7 @@ import React from 'react';
 
 const Input = ({title = "", type = "", value, onChange}) => {
     return (
-        <div className="relative w-full min-w-[200px] h-10">
+        <div className="relative w-full h-10">
             <input
                 type={type}
                 value={value}

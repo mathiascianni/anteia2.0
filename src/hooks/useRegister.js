@@ -54,13 +54,15 @@ const useRegister = () => {
             await setDoc(doc(firestore, "users", userCredential.user.uid), {
                 displayName: username,
                 email: email,
-                badges: {},
-                games: {},
-                stats: {},
+                badges: [],
+                games: [],
+                recommendations: 0,
+                matchs: 0,
                 stars: 0,
                 banner: '',
                 photoURL: "https://firebasestorage.googleapis.com/v0/b/anteia-db.appspot.com/o/users%2Favatar.png?alt=media&token=1d387f13-2e06-40a1-966d-bb2c43506d4b",
                 createdAt: new Date(),
+                role: "user",
             });
 
             setUsername("");

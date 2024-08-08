@@ -3,9 +3,12 @@ import Input from '../components/Auth/Input';
 import Checkbox from '../components/Auth/Checkbox';
 import { TopBar } from '../components/Navigation';
 import useRegister from '../hooks/useRegister';
+import { useNavigate } from 'react-router-dom';
 
 
 const Register = () => {
+  const navigate = useNavigate();
+
   const {
     username,
     email,
@@ -22,54 +25,51 @@ const Register = () => {
 
 
   return (
-    <div className="">
-      <TopBar backBtn title="Crear cuenta" />
-      {error && <p className="text-red-500 text-sm text-start px-8 mt-5">{error}</p>}
-      <div className="my-5 w-[90%] gap-6 flex flex-col mx-auto">
-        <Input
-          title="Nombre de usuario"
-          type="text"
-          value={username}
-          onChange={handleUsernameChange}
-        />
-        <Input
-          title="Email"
-          type="email"
-          value={email}
-          onChange={handleEmailChange}
-        />
-        <Input
-          title="Contraseña"
-          type="password"
-          value={password}
-          onChange={handlePasswordChange}
-        />
-        <Input
-          title="Confirmar contraseña"
-          type="password"
-          value={confirmPassword}
-          onChange={handleConfirmPasswordChange}
-        />
-      </div>
+    <main className="px-4 pb-8 flex flex-col justify-between min-h-screen">
+      <TopBar title="Crear cuenta" />
       
-      <Checkbox text="Acepto los terminos y condiciones" />
+      <div className='flex-1'>
+        <div className="my-5 gap-6 flex flex-col">
+          <Input
+            title="Nombre de usuario"
+            type="text"
+            value={username}
+            onChange={handleUsernameChange}
+          />
+          <Input
+            title="Email"
+            type="email"
+            value={email}
+            onChange={handleEmailChange}
+          />
+          <Input
+            title="Contraseña"
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+          />
+          <Input
+            title="Confirmar contraseña"
+            type="password"
+            value={confirmPassword}
+            onChange={handleConfirmPasswordChange}
+          />
+        </div>
+        {error && <p className="text-red-500 text-sm text-start mt-5 ">{error}</p>}
+        <Checkbox text="Acepto los terminos y condiciones" />
+      </div>
 
-      <div className="fixed bottom-0 w-full flex flex-col">
+      <div className="w-full flex flex-col">
         <button
-          className="mx-auto text-white bg-primary px-32 py-4 rounded-lg"
+          className="text-white bg-primary py-5 rounded-lg mb-8"
           onClick={handleSubmit}
           disabled={loading}
         >
           Crear cuenta
         </button>
-        <label className="my-8">
-          ¿Ya tienes una cuenta?{" "}
-          <span onClick={() => window.location.href = "/login"} className="text-primary font-bold">
-            Inicia sesión
-          </span>
-        </label>
+        <p className='text-center'>¿Ya tienes una cuenta? <span onClick={() => navigate('/login')} className="text-primary font-bold">Inicia sesión</span></p>
       </div>
-    </div>
+    </main>
   );
 };
 

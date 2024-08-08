@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import OptionItem from '../components/Options/OptionItem';
 import { auth } from '../credentials';
+import OptionItem from '../components/Options/OptionItem';
 
 const Options = () => {
     const navigate = useNavigate();
