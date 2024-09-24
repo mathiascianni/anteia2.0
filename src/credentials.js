@@ -24,6 +24,11 @@ export const firestore = getFirestore(app);
 
 // Recupera datos del usuario por ID desde Firestore
 export async function getUserById(userId) {
+  if (!userId) {
+    console.error('getUserById: userId es undefined o null');
+    return null;
+  }
+  
   try {
     const userRef = doc(firestore, 'users', userId);
     const userDoc = await getDoc(userRef);
@@ -31,7 +36,7 @@ export async function getUserById(userId) {
     if (userDoc.exists()) {
       return { id: userDoc.id, ...userDoc.data() };
     } else {
-      console.log('No se encontró ningún usuario con el ID especificado.');
+      console.log('No se encontró ningún usuario con el ID especificado:', userId);
       return null;
     }
   } catch (error) {

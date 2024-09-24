@@ -12,9 +12,11 @@ import AddPlans from "../pages/Admin/AddPlans";
 import Options from "../pages/Options";
 import Game from "../pages/Game";
 import MyProfile from "../pages/MyProfile";
-
+import ListChats from "../pages/ListChats";
+import Chat from "../pages/Chat";
 //Middlewares
 import IsAuth from "../middlewares/IsAuth";
+
 
 const MainRoutes = () => {
   return (
@@ -23,6 +25,8 @@ const MainRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<IsAuth><MainLayout><MyProfile /></MainLayout></IsAuth>} />
+      <Route path="/chats" element={<IsAuth><MainLayout><ListChats/></MainLayout></IsAuth>} />
+      <Route path="/chats/:userId" element={<IsAuth><MainLayout><Chat /></MainLayout></IsAuth>} />
       <Route path="/profile/edit" element={<MainLayout><ProfileEdit /></MainLayout>} />
       <Route path="/profile/:uid" element={<MainLayout><Profile /></MainLayout>} />
       <Route path="/admin" element={<MainLayout><AdminIndex /></MainLayout>} />

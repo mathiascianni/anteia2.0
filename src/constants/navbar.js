@@ -8,7 +8,7 @@ export const navLinks = [
     },
     {
         title: "Chats",
-        path: "/",
+        path: "/chats",
         icon: Chat
     },
     {

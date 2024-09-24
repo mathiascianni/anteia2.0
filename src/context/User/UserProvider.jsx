@@ -21,6 +21,7 @@ const UserProvider = ({ children }) => {
             if (user) {
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
+                    console.log(docSnap.data());
                     setUserRole(docSnap.data().role);
                 } catch (error) {
                     console.error('Error al obtener datos de usuario:', error);
