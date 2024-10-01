@@ -217,7 +217,6 @@ export function getUserProfileImageURL(userId) {
   return getDownloadURL(storageRef);
 }
 
-
 export async function getGameById(gameId) {
   try {
     const gameRef = doc(firestore, 'games', gameId);
@@ -233,4 +232,61 @@ export async function getGameById(gameId) {
     console.error('Error al obtener juego por ID:', error);
     throw error;
   }
+}
+
+export const followUser = async (currentUserId, userToFollowId) => {
+  try {
+    const currentUserRef = doc(firestore, 'users', currentUserId);
+    
+    await updateDoc(currentUserRef, {
+      friends: arrayUnion(userToFollowId)
+    });
+
+    console.log(`Usuario ${currentUserId} ahora sigue a ${userToFollowId}`);
+  } catch (error) {
+    console.error('Error al seguir al usuario:', error);
+    throw error;
+  }
+};
+
+// Recupera la lista de amigos del usuario actual
+export const getFriends = async (userId) => {
+  try {
+    const userRef = doc(firestore, 'users', userId);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      return userData.friends || [];
+    } else {
+      console.log('No se encontró el documento del usuario.');
+      return [];
+    }
+  } catch (error) {
+    console.error('Error al obtener la lista de amigos:', error);
+    throw error;
+  }
+};
+
+// Recupera datos de los amigos del usuario autenticado desde Firestore
+export async function getFriendsData() {
+  const auth = getAuth();
+  const userId = auth.currentUser.uid;
+  const userRef = doc(firestore, 'users', userId);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    throw new Error('El documento del usuario no existe');
+  }
+
+  const userData = userDoc.data();
+  const friendsIds = userData.friends || [];
+
+  const friendsData = await Promise.all(friendsIds.map(async (friendId) => {
+    const friendRef = doc(firestore, 'users', friendId);
+    const friendDoc = await getDoc(friendRef);
+    return { id: friendDoc.id, ...friendDoc.data() };
+  }));
+
+  return friendsData;
 }

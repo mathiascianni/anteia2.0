@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { auth, changeGameCondition, completeBadges, getDataDB, getUserById } from '../credentials';
+import { auth, changeGameCondition, completeBadges, getDataDB, getUserById, followUser } from '../credentials';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { EditIcon } from '../Icons';
 import UserCard from '../components/Home/UserCard';
@@ -16,6 +16,8 @@ const Profile = () => {
   const [profileImageURL, setProfileImageURL] = useState('');
   const [profileBannerURL, setProfileBannerURL] = useState('');
   const [games, setGames] = useState([]);
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     const getBadges = async () => {
@@ -88,6 +90,28 @@ const Profile = () => {
     }
   }, [location.pathname, uid]);
 
+  const checkCurrentUser = auth.onAuthStateChanged((currentUser) => {
+    if (currentUser) {
+      setIsCurrentUser(currentUser.uid === uid);
+      // Verificar si el usuario actual ya sigue a este perfil
+      getUserById(currentUser.uid).then(currentUserData => {
+        setIsFollowing(currentUserData.friends && currentUserData.friends.includes(uid));
+      });
+    }
+  });
+
+  const handleFollow = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await followUser(currentUser.uid, user.id);
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error('Error al seguir al usuario:', error);
+    }
+  };
+
   if (loading) {
     return <SpinnerLoader />;
   }
@@ -97,6 +121,22 @@ const Profile = () => {
         <TopBar backBtn bell />
       </div>
       <ProfileHeader user={user} />
+      {!isCurrentUser && (
+        <div className='px-4 my-4'>
+          {isFollowing ? (
+            <Link to={`/chats/${user.id}`} className="btn">
+              Mandar un mensaje
+            </Link>
+          ) : (
+            <button
+              onClick={handleFollow}
+              className="btn"
+            >
+              Seguir
+            </button>
+          )}
+        </div>
+      )}
       <div className='px-4 my-4'>
         <Stats user={user} />
         <Badges user={user} />
