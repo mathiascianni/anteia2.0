@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { addDataArrayDB, getGameById } from '../credentials';
+import { SpinnerLoader } from '../components/General';
 
 
 const Game = () => {
     const { uid } = useParams();
     const [game, setGame] = useState(null);
+    const [status, setStatus] = useState(null)
 
     useEffect(() => {
         const fetchGame = async () => {
@@ -16,8 +18,13 @@ const Game = () => {
         fetchGame();
     }, [uid]);
 
+    const handleSubmit = async () => {
+        const result = await addDataArrayDB(game, 'games');
+        setStatus(result); 
+    };
+
     if (!game) {
-        return <div>Cargando...</div>;
+        return <SpinnerLoader/>;
     }
 
     const backgroundStyle = game.banner
@@ -38,8 +45,12 @@ const Game = () => {
             </div>
             <div className='text-center mt-[3.5rem]'>
                 <h1 className='text-2xl font-bold'>{game.title}</h1>
-                <button className='mt-2 bg-primary text-white py-2 px-4 rounded' onClick={() => addDataArrayDB(game, 'games')}>Agregar a Favoritos</button>
+                <button className='mt-2 bg-primary text-white py-2 px-4 rounded' onClick={handleSubmit}>
+                    {status ? 'Agregar a favoritos' : 'Juego agregado'}
+                </button>
             </div>
+
+            
 
         </div>
     );

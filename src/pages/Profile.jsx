@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { auth, changeGameCondition, completeBadges, getDataDB, getUserById, followUser } from '../credentials';
+import { auth, changeGameCondition, completeBadges, getDataDB, getUserById, followUser, createMatchDocument } from '../credentials';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { EditIcon } from '../Icons';
 import UserCard from '../components/Home/UserCard';
 import { SpinnerLoader } from '../components/General';
 import { TopBar } from '../components/Navigation';
 import { Badges, FavoriteGames, ProfileCardPreview, ProfileHeader, Stats } from '../components/Profile';
+import Button from '../components/Auth/Button';
 
 const Profile = () => {
   const { uid } = useParams();
@@ -93,7 +94,6 @@ const Profile = () => {
   const checkCurrentUser = auth.onAuthStateChanged((currentUser) => {
     if (currentUser) {
       setIsCurrentUser(currentUser.uid === uid);
-      // Verificar si el usuario actual ya sigue a este perfil
       getUserById(currentUser.uid).then(currentUserData => {
         setIsFollowing(currentUserData.friends && currentUserData.friends.includes(uid));
       });
@@ -105,6 +105,9 @@ const Profile = () => {
       const currentUser = auth.currentUser;
       if (currentUser) {
         await followUser(currentUser.uid, user.id);
+       
+        const matchId = `match_${currentUser.uid}_${user.id}`; // Genera el matchId
+        await createMatchDocument(matchId, currentUser.uid, user.id); 
         setIsFollowing(true);
       }
     } catch (error) {
@@ -125,15 +128,10 @@ const Profile = () => {
         <div className='px-4 my-4'>
           {isFollowing ? (
             <Link to={`/chats/${user.id}`} className="btn">
-              Mandar un mensaje
+              <Button text={'Mandar un mensaje'}/>
             </Link>
           ) : (
-            <button
-              onClick={handleFollow}
-              className="btn"
-            >
-              Seguir
-            </button>
+            <Button text={'Seguir +'} handleSubmit={handleFollow} />
           )}
         </div>
       )}

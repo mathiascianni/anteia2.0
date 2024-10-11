@@ -5,7 +5,7 @@ const Badges = ({ user }) => {
                 <h2 className='font-bold text-lg mb-2 '>Insignias de {user.displayName}</h2>
             </div>
             {
-                user.badges.length > 0 ?
+                user.badges && user.badges.length > 0 ?
                     <div className='grid grid-cols-4 gap-1'>
                         {user.badges.map((badge) => (
                             <div key={badge.id} >

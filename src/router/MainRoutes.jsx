@@ -24,7 +24,7 @@ const MainRoutes = () => {
       <Route path="/" element={<IsAuth><MainLayout><Home /></MainLayout></IsAuth>} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/profile" element={<IsAuth><MainLayout><MyProfile /></MainLayout></IsAuth>} />
+      <Route path="/profile" element={<MainLayout><MyProfile /></MainLayout>} />
       <Route path="/chats" element={<IsAuth><MainLayout><ListChats/></MainLayout></IsAuth>} />
       <Route path="/chats/:userId" element={<IsAuth><MainLayout><Chat /></MainLayout></IsAuth>} />
       <Route path="/profile/edit" element={<MainLayout><ProfileEdit /></MainLayout>} />

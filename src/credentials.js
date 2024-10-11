@@ -185,7 +185,7 @@ export const addDataArrayDB = async (data, path) => {
 
   if (gameExists) {
     console.log('El juego ya existe en el array de juegos del usuario.');
-    return;
+    return false;
   }
 
   const newData = {
@@ -200,6 +200,7 @@ export const addDataArrayDB = async (data, path) => {
   });
 
   console.log('Juego agregado exitosamente al array de juegos del usuario.');
+  return true
 };
 
 // Elimina un documento de una ruta específica en Firestore
@@ -290,3 +291,43 @@ export async function getFriendsData() {
 
   return friendsData;
 }
+
+
+export const createMatchDocument = async (matchId, userAuth, userFollow) => {
+  try {
+    const matchRef = doc(firestore, 'matchs', matchId); 
+    await setDoc(matchRef, {
+      [userAuth]: { active: true }, 
+      [userFollow]: { active: false } 
+    });
+    console.log(`Documento creado en 'matchs' con ID: ${matchId}`);
+  } catch (error) {
+    console.error('Error al crear el documento en matchs:', error);
+    throw error;
+  }
+};
+
+// Función para obtener datos del usuario por token
+export const getUserByToken = async (token) => { // {{ edit_1 }}
+  if (!token) {
+    console.error('getUserByToken: token es undefined o null');
+    return null;
+  }
+
+  try {
+    const auth = getAuth(); // {{ edit_2 }}
+    const userCredential = await auth.signInWithCustomToken(token); // {{ edit_3 }}
+    const user = userCredential.user;
+
+    if (user) {
+      const userData = await getUserById(user.uid); // {{ edit_4 }}
+      return userData; // Devuelve los datos del usuario
+    } else {
+      console.log('No se encontró el usuario.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error al obtener usuario por token:', error);
+    throw error;
+  }
+};

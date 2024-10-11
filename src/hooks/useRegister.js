@@ -37,6 +37,13 @@ const useRegister = () => {
             return;
         }
 
+        // {{ edit_1 }} Validaciones de la contraseña
+        const passwordValidation = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        if (!passwordValidation.test(password)) {
+            setError("La contraseña debe tener al menos 8 caracteres, incluyendo letras y números.");
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError("Las contraseñas no coinciden.");
             return;

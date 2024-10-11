@@ -8,6 +8,7 @@ const Options = () => {
 
     const handleLogout = async () => {
         try {
+            localStorage.removeItem('userToken');
             await auth.signOut();
             navigate('/login');
         } catch (error) {

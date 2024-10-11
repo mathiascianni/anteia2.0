@@ -30,7 +30,9 @@ const Login = () => {
         }
         try {
             setLoading(true);
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const userId = userCredential.user.uid; // {{ edit_1 }}
+            localStorage.setItem('userId', userId); // {{ edit_2 }}
 
             setError("");
             setEmail("");

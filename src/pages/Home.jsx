@@ -17,7 +17,11 @@ const Home = () => {
     const obtenerUsuarios = async () => {
       try {
         const datos = await getDataDB('users');
-        setUsers(datos);
+        const usuariosFiltrados = datos.filter(user => user.id !== auth.currentUser.uid);
+
+        const usuariosOrdenados = usuariosFiltrados.sort((a, b) => b.matchs - a.matchs).slice(0, 3);
+
+        setUsers(usuariosOrdenados);
         setLoading(false);
       } catch (error) {
         console.error('Error al obtener datos de usuarios:', error);
@@ -36,8 +40,8 @@ const Home = () => {
   return (
     <div className="mx-auto px-4">
       <TopBar bell />
+      <h1>Usuarios con mas matchs</h1>
       <ul>
-        {console.log(auth)}
         {users.map((user) => (
           <Link to={`/profile/${user.id}`} className='block' key={user.id}>
             <UserCard key={user.id} user={user} />

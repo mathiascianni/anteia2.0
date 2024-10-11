@@ -5,7 +5,7 @@ const FavoriteGames = ({ user }) => {
                 <h2 className='font-bold text-lg mb-2'>Juegos favoritos de {user.displayName}</h2>
             </div>
             {
-                user.games.length > 0 ?
+                user.games && user.games.length > 0 ?
                     <div className='grid grid-cols-4 gap-1'>
                         {user.games.map((game) => (
                             <div key={game.title}>
