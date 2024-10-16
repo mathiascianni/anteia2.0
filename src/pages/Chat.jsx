@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { firestore, auth, getUserById } from '../credentials';
+import { firestore, auth, getUserById, sendNotification } from '../credentials';
 import { collection, addDoc, doc, getDoc, setDoc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getMessaging, onMessage } from "firebase/messaging";
@@ -21,22 +21,36 @@ const Chat = () => {
 
     useEffect(() => {
         if (!currentUser || !recipient) return;
-
-        const chatId = [currentUser.uid, recipient.id].sort().join('_');
-        const chatRef = doc(firestore, 'chats', chatId);
-
-        getDoc(chatRef).then(chatDoc => {
-            if (!chatDoc.exists()) {
-                setDoc(chatRef, { participants: [currentUser.uid, recipient.id], createdAt: serverTimestamp() });
+    
+        const fetchChatData = async () => {
+            try {
+                let chatRef = doc(firestore, 'chats', `${currentUser.uid}_${recipient.id}`);
+                let chatDoc = await getDoc(chatRef); 
+                console.log(chatDoc.id);
+    
+                if (!chatDoc.exists()) {
+                    chatRef = doc(firestore, 'chats', `${recipient.id}_${currentUser.uid}`);
+                    chatDoc = await getDoc(chatRef);
+                    console.log(chatDoc.id);
+                }
+    
+                let chatId = chatDoc.id; 
+    
+                setChatId(chatId);
+    
+                return onSnapshot(
+                    query(collection(chatRef, 'messages'), orderBy('timestamp', 'asc')),
+                    snapshot => setMessages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+                );
+            } catch (error) {
+                console.error("Error fetching chat data:", error);
             }
-            setChatId(chatId);
-
-            return onSnapshot(
-                query(collection(chatRef, 'messages'), orderBy('timestamp', 'asc')),
-                snapshot => setMessages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
-            );
-        }).catch(console.error);
+        };
+    
+        fetchChatData(); 
+    
     }, [currentUser, recipient]);
+    
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,7 +60,6 @@ const Chat = () => {
         const messaging = getMessaging();
         const unsubscribe = onMessage(messaging, (payload) => {
             console.log('Notificación recibida:', payload);
-            // Aquí puedes manejar la notificación, por ejemplo, actualizando el estado de los mensajes
         });
 
         return () => unsubscribe();
@@ -60,25 +73,15 @@ const Chat = () => {
             const messageRef = await addDoc(collection(doc(firestore, 'chats', chatId), 'messages'), {
                 text: newMessage,
                 sender: currentUser.uid,
-                timestamp: serverTimestamp()
+                timestamp: serverTimestamp(),
+                view:false
             });
-
-            // Enviar notificación
-            const functions = getFunctions();
-            const sendNotification = httpsCallable(functions, 'sendNotification');
-            await sendNotification({
-                recipientId: recipient.id,
-                senderName: currentUser.displayName || currentUser.email,
-                messageText: newMessage,
-                chatId: chatId
-            });
-
+            await sendNotification(newMessage, currentUser.uid, userId)
             setNewMessage('');
         } catch (error) {
             console.error('Error al enviar el mensaje:', error);
         }
     };
-
     return (
         <div className="mx-auto border border-gray-200 flex flex-col">
             <div className="bg-primary text-white p-4 flex items-center">

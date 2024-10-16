@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { addDataArrayDB, getGameById } from '../credentials';
+import { Link, useParams } from 'react-router-dom';
+import { addDataArrayDB, auth, completeBadges, getGameById, getUsersByGame } from '../credentials';
 import { SpinnerLoader } from '../components/General';
-
+import UserCard from '../components/Home/UserCard';
 
 const Game = () => {
     const { uid } = useParams();
     const [game, setGame] = useState(null);
-    const [status, setStatus] = useState(null)
+    const [status, setStatus] = useState(null);
+    const [usersWithGame, setUsersWithGame] = useState([]);
+    const [userId, setUserId] = useState(null)
 
     useEffect(() => {
         const fetchGame = async () => {
+            const userData = auth.currentUser;
+            setUserId(userData.uid)
             const gameData = await getGameById(uid);
             setGame(gameData);
+            const users = await getUsersByGame(gameData.uid);
+            setUsersWithGame(users);
         };
 
         fetchGame();
@@ -20,13 +26,14 @@ const Game = () => {
 
     const handleSubmit = async () => {
         const result = await addDataArrayDB(game, 'games');
+        await completeBadges(userId, 'Juguemos')
         setStatus(result); 
     };
 
     if (!game) {
         return <SpinnerLoader/>;
     }
-
+    console.log(usersWithGame)
     const backgroundStyle = game.banner
         ? { backgroundImage: `url(${game.banner})`, backgroundSize: 'cover' }
         : {};
@@ -49,7 +56,13 @@ const Game = () => {
                     {status ? 'Agregar a favoritos' : 'Juego agregado'}
                 </button>
             </div>
-
+            <div className='px-4'>
+                {usersWithGame.map(user => (
+                    <Link to={`/profile/${user.id}`} className='block' key={user.id}>
+                    <UserCard key={user.id} user={user} />
+                  </Link>
+                ))}
+            </div>
             
 
         </div>

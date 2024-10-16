@@ -13,7 +13,7 @@ export const navLinks = [
     },
     {
         title: "Matchs",
-        path: "/",
+        path: "/matchs",
         icon: Heart
     },
     {

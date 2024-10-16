@@ -1,21 +1,23 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const Toast = () => {
+const Toast = ({ user, message, hour }) => {
+    console.log(user)
     return (
 
-        <div class="w-full shadow p-4 absolute max-w-[90%] z-50 top-2 right-1/2 translate-x-1/2  text-gray-500 bg-white rounded-lg" role="alert">
-            <div class="flex">
-                <img class="w-8 h-8 rounded-full" src="ruta que no tegno idea como seria" alt="Adrian" />
-                <div class="ms-3 text-sm font-normal">
-                    <span class="mb-1 text-sm font-semibold text-primary">Adrian</span>
-                    <div class="mb-2 text-xs font-normal text-black">Que haces pa sale ese valorant</div>
+        <Link to={`/chats/${user.id}`} className="w-full shadow p-4 max-w-[90%] z-50 text-gray-500 bg-white rounded-lg mt-2">
+            <div className="flex">
+                <img className="w-8 h-8 rounded-full" src={user.photoURL} alt="Adrian" />
+                <div className="ms-3 text-sm font-normal">
+                    <span className="mb-1 text-sm font-semibold text-primary">{user.displayName}</span>
+                    <div className="mb-2 text-xs font-normal text-black">{message}</div>
                 </div>
-                <div class="ms-auto -mt-1">
-                    <span class="text-xs text-gray-400 ">2:33pm</span>
+                <div className="ms-auto -mt-1">
+                    <span className="text-xs text-gray-400">22:00</span>
                 </div>
             </div>
-        </div>
 
+        </Link>
     );
 }
 

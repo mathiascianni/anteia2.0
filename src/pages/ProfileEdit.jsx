@@ -4,6 +4,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import Input from '../components/Auth/Input';
 import Button from '../components/Auth/Button';
 import { SpinnerLoader } from '../components/General';
+import Checkbox from '../components/Auth/Checkbox';
 
 const ProfileEdit = () => {
     const [authUser, setAuthUser] = useState(null);
@@ -12,6 +13,7 @@ const ProfileEdit = () => {
     const [password, setPassword] = useState('');
     const [banner, setBanner] = useState('');
     const [profileImage, setProfileImage] = useState(null);
+    const [showPassword, setShowPassword] = useState(false); // Nuevo estado para controlar el checkbox
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => setAuthUser(user));
@@ -69,7 +71,7 @@ const ProfileEdit = () => {
             });
 
             await updateAuthUserProfile(username, profileDownloadURL, email);
-            completeBadges(authUser.uid, 'primer edit');
+            await completeBadges(authUser.uid, 'Primer Cambio');
             console.log('Profile updated successfully!');
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -85,7 +87,6 @@ const ProfileEdit = () => {
                     <form className='flex flex-col space-y-4 my-8' onSubmit={handleUpdateProfile}>
                         <Input title="Username" type="text" value={username} onChange={handleInputChange(setUsername)} required />
                         <Input title="Email" type="email" value={email} onChange={handleInputChange(setEmail)} />
-                        <Input title="New Password" type="password" value={password} onChange={handleInputChange(setPassword)} />
                         <label>
                             <p>Profile:</p>
                             <input className='hidden' type="file" id="profile" name="profile" onChange={handleFileChange(setProfileImage)} />
@@ -101,6 +102,13 @@ const ProfileEdit = () => {
                             <input type="file" id='banner' name='banner' className='hidden' onChange={handleFileChange(setBanner)} />
                             {banner && <img className='rounded-md' htmlFor="banner" src={banner} alt="Banner" />}
                         </label>
+                        <Checkbox text={"Cambiar contraseña"} onChange={() => setShowPassword(!showPassword)} />
+                        {showPassword && (
+                            <div className='space-y-4'>
+                                <Input title="Contraseña" type="password" value={password} onChange={handleInputChange(setPassword)} />
+                                <Input title="Nueva contraseña" type="password" value={password} onChange={handleInputChange(setPassword)} />
+                            </div>
+                        )}
                         <Button text="Update Profile" handleSubmit={handleUpdateProfile} />
                     </form>
                 </>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Input from '../components/Auth/Input';
 import Checkbox from '../components/Auth/Checkbox';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../credentials';
+import { auth, completeBadges } from '../credentials';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Auth/Button';
 import { TopBar } from '../components/Navigation';
@@ -31,12 +31,13 @@ const Login = () => {
         try {
             setLoading(true);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const userId = userCredential.user.uid; // {{ edit_1 }}
-            localStorage.setItem('userId', userId); // {{ edit_2 }}
+            const userId = userCredential.user.uid; 
+            localStorage.setItem('userId', userId); 
 
             setError("");
             setEmail("");
             setPassword("");
+            await completeBadges(userId, 'Bienvenido')
             navigate("/");
         } catch (error) {
             setError(error.message);

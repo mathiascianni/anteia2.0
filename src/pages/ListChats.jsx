@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getFriendsData } from '../credentials';
+import { getMatchsData } from '../credentials';
 import { TopBar } from '../components/Navigation';
 
 const ListChats = () => {
@@ -9,7 +9,7 @@ const ListChats = () => {
     useEffect(() => {
         const obtenerUsuarios = async () => {
             try {
-                const datosUsuarios = await getFriendsData();
+                const datosUsuarios = await getMatchsData();
                 setUsuarios(datosUsuarios);
             } catch (error) {
                 console.error('Error al obtener usuarios:', error);
