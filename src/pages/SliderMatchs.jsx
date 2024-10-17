@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createChat, getDataDB } from '../credentials';
+import { checkFollowStatus, createChat, getDataDB } from '../credentials';
 import { TopBar } from '../components/Navigation';
 import { getAuth } from 'firebase/auth';
 import { Badge, EmptyStar, Heart, Star, Thumb } from '../Icons';
@@ -38,6 +38,8 @@ const SliderMatchs = () => {
         if (direction === 'right') {
             card.style.transition = 'transform 0.3s ease';
             card.style.transform = 'translateX(100%)';
+            const status = await checkFollowStatus()
+            console.log(status)
             await createChat(currentUserId, targetUserId);
             navigate(`/profile/${targetUserId}`); 
         } else if (direction === 'left') {

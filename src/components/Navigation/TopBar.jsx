@@ -8,14 +8,14 @@ import Toast from "../Home/Toast";
 const TopBar = ({ backBtn, title, bell }) => {
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState();
-    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal
-    const [userData, setUserData] = useState({}); // Estado para almacenar los datos del usuario
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [userData, setUserData] = useState({});
 
     const handleBackClick = () => {
         navigate(-1);
     };
 
-    const handleBellClick = () => { // Nueva función para manejar el clic en Bell
+    const handleBellClick = () => {
         setIsModalOpen(true);
     };
 
@@ -25,12 +25,12 @@ const TopBar = ({ backBtn, title, bell }) => {
                 const notiRef = await getNotifications();
                 setNotifications(notiRef);
 
-                // Obtener datos de los usuarios a partir de los IDs en las notificaciones
+
                 const users = await Promise.all(notiRef.map(async (notification) => {
-                    const user = await getUserById(notification.sender); // Obtener datos del usuario
+                    const user = await getUserById(notification.sender);
                     return user;
                 }));
-                setUserData(users); // Almacenar los datos de los usuarios
+                setUserData(users);
             };
             fetchNotiData();
         }
@@ -50,7 +50,7 @@ const TopBar = ({ backBtn, title, bell }) => {
             {title && <h1 className='text-2xl font-titles font-thin flex-1 text-center'>{title}</h1>}
 
             {bell &&
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 block" onClick={handleBellClick}> {/* Agregado onClick */}
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 block" onClick={handleBellClick}>
                     <Bell />
                     {notifications && notifications.length > 0 && <div className="w-4 h-4 rounded-full bg-primary absolute bottom-3 left-3 flex items-center justify-center">
                         <span className="text-white text-[12px]">{notifications.length}</span>
@@ -58,19 +58,22 @@ const TopBar = ({ backBtn, title, bell }) => {
                 </div>
             }
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center z-50"> {/* Fondo del modal */}
+
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center z-50">
+                    <div className="flex justify-end w-full px-4">
+                        <button
+                            className="mt-4 bg-primary text-white py-2 px-4 rounded-full hover:bg-primary-dark"
+                            onClick={() => setIsModalOpen(false)}>
+                            X
+                        </button>
+                    </div>
                     {notifications && notifications.length > 0 ? (
                         notifications.map((notification, index) => (
-                            <Toast user={userData[index]} message={notification.message} />
+                            <Toast user={userData[index]} notification={notification} />
                         ))
                     ) : (
-                        <p>No hay notificaciones.</p> // Mensaje si no hay notificaciones
+                        <p className="text-white font-bold bg-primary p-2">No hay notificaciones.</p>
                     )}
-                    <button
-                        className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                        onClick={() => setIsModalOpen(false)}> {/* Botón para cerrar el modal */}
-                        Cerrar
-                    </button>
                 </div>
 
             )}
