@@ -298,7 +298,7 @@ export const createChat = async (currentUserId, userFollowId) => {
  
   if (chatDoc.exists()) {
     console.log('El chat ya existe, no se creará uno nuevo.');
-    return; 
+    return false; 
   }
 
   chatRef = doc(firestore, 'chats', `${userFollowId}_${currentUserId}`);
@@ -306,7 +306,7 @@ export const createChat = async (currentUserId, userFollowId) => {
   
   if (chatDoc.exists()) {
     console.log('El chat ya existe en la otra dirección, no se creará uno nuevo.');
-    return; 
+    return false; 
   }
 
   await setDoc(chatRef, { participants: [currentUserId, userFollowId], [currentUserId]: true, [userFollowId]: false }, { merge: true });

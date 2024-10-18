@@ -123,9 +123,6 @@ const Chat = () => {
                         placeholder="Escribe un mensaje..."
                         className="flex-grow px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                    <button type="submit" className="ml-2 px-6 py-2 bg-primary text-white rounded-full hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                        Enviar
-                    </button>
                 </form>
             </div>
         </div>
