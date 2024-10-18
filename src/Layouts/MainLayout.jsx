@@ -31,7 +31,7 @@ const MainLayout = ({ children }) => {
   return (
     <>
       {badgeCondition ? (
-        <ToastBadge badge={badge} />
+        <ToastBadge badge={badge} condition={badgeCondition} />
       ) : null}
       <main className="mb-[120px]">
         {children}

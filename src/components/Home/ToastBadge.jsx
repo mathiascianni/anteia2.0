@@ -1,9 +1,9 @@
 import React from 'react';
 
-const ToastBadge = ({ badge }) => {
+const ToastBadge = ({ badge, condition }) => {
     return (
-        <div className="absolute left-1/2 top-2 transform -translate-x-1/2 w-full shadow p-4 max-w-[90%] z-50 text-gray-500 bg-white rounded-lg mt-2">
-            <div className="flex">
+        <div className='absolute left-1/2 top-2 transform -translate-x-1/2 w-full shadow p-4 max-w-[90%] z-50 text-gray-500 bg-white rounded-lg mt-2'>
+            <div className="flex fade-down">
                 <div className='mx-auto p-3 w-12 h-12 bg-[url("/media/extras/badge_complete.png")]'>
                     <img className='mx-auto' src={badge.icon} alt={badge.title} />
                 </div>
