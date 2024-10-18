@@ -1,10 +1,11 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, updateEmail, updateProfile } from "firebase/auth";
-import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion, addDoc } from 'firebase/firestore';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getDatabase, update } from "firebase/database";
+import { getDocs, where } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyB6RI-b-91E_sS7rsmIq8mRZVl2qHPOuf4",
@@ -24,6 +25,11 @@ export const firestore = getFirestore(app);
 
 // Recupera datos del usuario por ID desde Firestore
 export async function getUserById(userId) {
+  if (!userId) {
+    console.error('getUserById: userId es undefined o null');
+    return null;
+  }
+
   try {
     const userRef = doc(firestore, 'users', userId);
     const userDoc = await getDoc(userRef);
@@ -31,7 +37,7 @@ export async function getUserById(userId) {
     if (userDoc.exists()) {
       return { id: userDoc.id, ...userDoc.data() };
     } else {
-      console.log('No se encontró ningún usuario con el ID especificado.');
+      console.log('No se encontró ningún usuario con el ID especificado:', userId);
       return null;
     }
   } catch (error) {
@@ -39,21 +45,51 @@ export async function getUserById(userId) {
     throw error;
   }
 }
+export const searchBadgeForName = async (badgeTitle) => {
+  try {
+    const badgesRef = collection(firestore, 'badges');
+    const q = query(badgesRef, where('title', '==', badgeTitle));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      const badge = {
+        id: doc.id,
+        title: doc.data().title,
+        ...doc.data()
+      };
+      return badge;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    throw error;
+  }
+};
 
 // Cambia el estado de una insignia especificada para un usuario
 export const completeBadges = async (userId, badgeName) => {
   try {
     const userRef = doc(firestore, "users", userId);
     const userSnap = await getDoc(userRef);
+    const badgeData = await searchBadgeForName(badgeName);
 
+    if (!badgeData) {
+      console.log(`No se encontró la insignia con el nombre: ${badgeName}`);
+      return; 
+    }
+    
     if (userSnap.exists()) {
       const userData = userSnap.data();
-      const currentStatus = userData.badges && userData.badges[badgeName];
+      const currentStatus = userData.badges && userData.badges[badgeData.id];
 
       await updateDoc(userRef, {
-        name: badgeName,
-        status: !currentStatus
+        [`badges.${badgeData.id}`]: badgeData 
       });
+
+      localStorage.setItem(`badgeCondition`, true); 
+
+      localStorage.setItem(`badge`, JSON.stringify(badgeData)); 
 
       console.log(`Insignia '${badgeName}' actualizada a ${!currentStatus}.`);
     } else {
@@ -64,7 +100,13 @@ export const completeBadges = async (userId, badgeName) => {
   }
 };
 
-// Cambia la condición de un juego en un índice específico en el array de juegos del usuario
+
+export const ChangeCondition = async () => {
+    localStorage.setItem('badgeCondition', false);
+    console.log('badgeCondition cambiado a false en localStorage.');
+};
+
+
 export const changeGameCondition = async (userId, gameIndex) => {
   try {
     const userRef = doc(firestore, 'users', userId);
@@ -180,7 +222,7 @@ export const addDataArrayDB = async (data, path) => {
 
   if (gameExists) {
     console.log('El juego ya existe en el array de juegos del usuario.');
-    return;
+    return false;
   }
 
   const newData = {
@@ -195,6 +237,7 @@ export const addDataArrayDB = async (data, path) => {
   });
 
   console.log('Juego agregado exitosamente al array de juegos del usuario.');
+  return true
 };
 
 // Elimina un documento de una ruta específica en Firestore
@@ -212,7 +255,6 @@ export function getUserProfileImageURL(userId) {
   return getDownloadURL(storageRef);
 }
 
-
 export async function getGameById(gameId) {
   try {
     const gameRef = doc(firestore, 'games', gameId);
@@ -229,3 +271,257 @@ export async function getGameById(gameId) {
     throw error;
   }
 }
+
+export const matchsUser = async (currentUserId, userFollowId) => {
+  try {
+    console.log(currentUserId, userFollowId)
+    const currentUserRef = doc(firestore, 'users', currentUserId);
+    const userFollowRef = doc(firestore, 'users', userFollowId)
+    await updateDoc(userFollowRef, {
+      matchs: arrayUnion(currentUserId)
+    });
+
+    await updateDoc(currentUserRef, {
+      matchs: arrayUnion(userFollowId)
+    });
+
+    console.log(`Usuario ${currentUserId} ahora sigue a ${userFollowId}`);
+  } catch (error) {
+    console.error('Error al seguir al usuario:', error);
+    throw error;
+  }
+};
+
+export const createChat = async (currentUserId, userFollowId) => {
+  let chatRef = doc(firestore, 'chats', `${currentUserId}_${userFollowId}`);
+  let chatDoc = await getDoc(chatRef);
+ 
+  if (chatDoc.exists()) {
+    console.log('El chat ya existe, no se creará uno nuevo.');
+    return; 
+  }
+
+  chatRef = doc(firestore, 'chats', `${userFollowId}_${currentUserId}`);
+  chatDoc = await getDoc(chatRef);
+  
+  if (chatDoc.exists()) {
+    console.log('El chat ya existe en la otra dirección, no se creará uno nuevo.');
+    return; 
+  }
+
+  await setDoc(chatRef, { participants: [currentUserId, userFollowId], [currentUserId]: true, [userFollowId]: false }, { merge: true });
+  console.log('Chat creado');
+}
+
+export const checkFollowStatus = async (currentUserId, userFollowId) => {
+  try {
+    let chatRef = doc(firestore, 'chats', `${currentUserId}_${userFollowId}`);
+    let chatDoc = await getDoc(chatRef);
+
+    if (!chatDoc.exists()) {
+      chatRef = doc(firestore, 'chats', `${userFollowId}_${currentUserId}`);
+      chatDoc = await getDoc(chatRef);
+    }
+
+    const exists1 = chatDoc.exists() ? chatDoc.data()[currentUserId] : false;
+    const exists2 = chatDoc.exists() ? chatDoc.data()[userFollowId] : false;
+
+
+    if (exists1 && exists2) {
+      return 1;
+    } else if (exists1) {
+      return 2;
+    } else if (exists2) {
+      return 3;
+    } else {
+      return 4;
+    }
+  } catch (error) {
+    console.error('Error al verificar el seguimiento:', error);
+    return 'Seguir +';
+  }
+};
+
+
+export const changeFollowStatus = async (currentUserId, userFollowId) => {
+  let chatRef = doc(firestore, 'chats', `${currentUserId}_${userFollowId}`);
+  let chatDoc = await getDoc(chatRef);
+
+  if (!chatDoc.exists()) {
+    chatRef = doc(firestore, 'chats', `${userFollowId}_${currentUserId}`);
+    chatDoc = await getDoc(chatRef);
+  }
+
+  const exists = chatDoc.data() ? chatDoc.data()[currentUserId] : false;
+
+  if (exists === false) {
+    await updateDoc(chatRef, {
+      [currentUserId]: true
+    });
+  }
+}
+export const getFriends = async (userId) => {
+  try {
+    const userRef = doc(firestore, 'users', userId);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      return userData.friends || [];
+    } else {
+      console.log('No se encontró el documento del usuario.');
+      return [];
+    }
+  } catch (error) {
+    console.error('Error al obtener la lista de amigos:', error);
+    throw error;
+  }
+};
+
+// Recupera datos de los amigos del usuario autenticado desde Firestore
+export async function getMatchsData() {
+  const auth = getAuth();
+  const userId = auth.currentUser.uid;
+  const userRef = doc(firestore, 'users', userId);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    throw new Error('El documento del usuario no existe');
+  }
+
+  const userData = userDoc.data();
+  const matchsIds = userData.matchs || [];
+
+  const matchsData = await Promise.all(matchsIds.map(async (matchId) => {
+    const matchRef = doc(firestore, 'users', matchId);
+    const matchDoc = await getDoc(matchRef);
+    return { id: matchDoc.id, ...matchDoc.data() };
+  }));
+
+  return matchsData;
+}
+
+
+export const createMatchDocument = async (matchId, userAuth, userFollow) => {
+  try {
+    const matchRef = doc(firestore, 'matchs', matchId);
+    await setDoc(matchRef, {
+      [userAuth]: { active: true },
+      [userFollow]: { active: false }
+    });
+    console.log(`Documento creado en 'matchs' con ID: ${matchId}`);
+  } catch (error) {
+    console.error('Error al crear el documento en matchs:', error);
+    throw error;
+  }
+};
+
+// Función para obtener datos del usuario por token
+export const getUserByToken = async (token) => {
+  if (!token) {
+    console.error('getUserByToken: token es undefined o null');
+    return null;
+  }
+
+  try {
+    const auth = getAuth();
+    const userCredential = await auth.signInWithCustomToken(token);
+    const user = userCredential.user;
+
+    if (user) {
+      const userData = await getUserById(user.uid);
+      return userData;
+    } else {
+      console.log('No se encontró el usuario.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error al obtener usuario por token:', error);
+    throw error;
+  }
+};
+
+export const getUsersByGame = async (gameId) => {
+  const auth = getAuth();
+  const currentUserId = auth.currentUser.uid;
+
+  const usersWithGame = await getDataDB('users');
+  const usersWithSpecificGame = usersWithGame.filter(user => {
+    return user.games.some(game => game.uid === gameId) && user.id !== currentUserId;
+  });
+  return usersWithSpecificGame;
+};
+
+export const AddRecomendation = async (userLikedId) => {
+  const auth = getAuth();
+  const userLiked = await getUserById(userLikedId);
+  const userAuth = await getUserById(auth.currentUser.uid);
+  console.log(userAuth);
+
+  const recommendationData = {
+    userId: userAuth.id,
+  };
+
+  await updateDoc(doc(firestore, 'users', userLikedId), {
+    recommendations: arrayUnion(recommendationData)
+  });
+
+  console.log(`Recomendación agregada para el usuario ${userLikedId} por el usuario ${userAuth.id}.`);
+
+  return userLiked;
+};
+
+export const sendNotification = async (message, currentUser, userSend) => {
+  try {
+    await addDoc(collection(doc(firestore, 'users', userSend), 'notifications'), {
+      message,
+      sender: currentUser,
+      timestamp: new Date()
+    });
+    console.log('Notificación enviada exitosamente.');
+  } catch (error) {
+    console.error('Error al enviar la notificación:', error);
+  }
+};
+
+export const getNotifications = async () => {
+  const userId = auth.currentUser.uid
+  try {
+    const notificationsRef = collection(doc(firestore, 'users', userId), 'notifications');
+    const querySnapshot = await getDocs(notificationsRef);
+    const notifications = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return notifications;
+  } catch (error) {
+    console.error('Error al obtener las notificaciones:', error);
+    throw error;
+  }
+};
+
+export const getAllNotifications = async (notificationsRef) => {
+  try {
+    const notificationsCollection = collection(firestore, notificationsRef);
+    const querySnapshot = await getDocs(notificationsCollection);
+    const notifications = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return notifications;
+  } catch (error) {
+    console.error('Error al obtener todas las notificaciones:', error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

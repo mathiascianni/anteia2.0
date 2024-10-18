@@ -5,8 +5,10 @@ import CarrouselGames from '../components/Home/CarrouselGames';
 import { SpinnerLoader } from '../components/General';
 import { Link } from 'react-router-dom';
 import { TopBar } from '../components/Navigation';
+import { getAuth } from 'firebase/auth';
 
 const Home = () => {
+  const auth = getAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,7 +17,11 @@ const Home = () => {
     const obtenerUsuarios = async () => {
       try {
         const datos = await getDataDB('users');
-        setUsers(datos);
+        const usuariosFiltrados = datos.filter(user => user.id !== auth.currentUser.uid);
+
+        const usuariosOrdenados = usuariosFiltrados.sort((a, b) => b.matchs - a.matchs).slice(0, 3);
+
+        setUsers(usuariosOrdenados);
         setLoading(false);
       } catch (error) {
         console.error('Error al obtener datos de usuarios:', error);
@@ -34,6 +40,7 @@ const Home = () => {
   return (
     <div className="mx-auto px-4">
       <TopBar bell />
+      <h1>Usuarios con mas matchs</h1>
       <ul>
         {users.map((user) => (
           <Link to={`/profile/${user.id}`} className='block' key={user.id}>

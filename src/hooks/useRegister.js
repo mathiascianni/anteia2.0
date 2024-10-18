@@ -37,6 +37,13 @@ const useRegister = () => {
             return;
         }
 
+        // {{ edit_1 }} Validaciones de la contraseña
+        const passwordValidation = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        if (!passwordValidation.test(password)) {
+            setError("La contraseña debe tener al menos 8 caracteres, incluyendo letras y números.");
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError("Las contraseñas no coinciden.");
             return;
@@ -54,13 +61,15 @@ const useRegister = () => {
             await setDoc(doc(firestore, "users", userCredential.user.uid), {
                 displayName: username,
                 email: email,
-                badges: {},
-                games: {},
-                stats: {},
+                badges: [],
+                games: [],
+                recommendations: 0,
+                matchs: 0,
                 stars: 0,
                 banner: '',
                 photoURL: "https://firebasestorage.googleapis.com/v0/b/anteia-db.appspot.com/o/users%2Favatar.png?alt=media&token=1d387f13-2e06-40a1-966d-bb2c43506d4b",
                 createdAt: new Date(),
+                role: "user",
             });
 
             setUsername("");

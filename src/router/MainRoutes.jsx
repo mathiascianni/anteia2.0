@@ -11,24 +11,33 @@ import ProfileEdit from "../pages/ProfileEdit";
 import AddPlans from "../pages/Admin/AddPlans";
 import Options from "../pages/Options";
 import Game from "../pages/Game";
+import MyProfile from "../pages/MyProfile";
+import ListChats from "../pages/ListChats";
+import Chat from "../pages/Chat";
+//Middlewares
+import IsAuth from "../middlewares/IsAuth";
+import SliderMatchs from "../pages/SliderMatchs";
 
 
 const MainRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+      <Route path="/" element={<IsAuth><MainLayout><Home /></MainLayout></IsAuth>} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
-      <Route path="/profile/edit" element={<MainLayout><ProfileEdit /></MainLayout>} />
-      <Route path="/profile/:uid" element={<MainLayout><Profile /></MainLayout>} />
-      <Route path="/admin" element={<MainLayout><AdminIndex /></MainLayout>} />
-      <Route path="/admin/addgame" element={<MainLayout><AddGame /></MainLayout>} />
-      <Route path="/admin/editgame/:uid" element={<MainLayout><EditGame /></MainLayout>} />
-      <Route path="/admin/addplan" element={<MainLayout><AddPlans /></MainLayout>} />
-      <Route path="/admin/editplan/:uid" element={<MainLayout><EditGame /></MainLayout>} />
-      <Route path="/options" element={<MainLayout><Options /></MainLayout>} />
-      <Route path="game/:uid" element={<MainLayout><Game /></MainLayout>} />
+      <Route path="/profile" element={<IsAuth><MainLayout><MyProfile /></MainLayout></IsAuth>} />
+      <Route path="/matchs" element={<IsAuth><MainLayout><SliderMatchs/></MainLayout></IsAuth>} />
+      <Route path="/chats" element={<IsAuth><MainLayout><ListChats/></MainLayout></IsAuth>} />
+      <Route path="/chats/:userId" element={<IsAuth><MainLayout><Chat /></MainLayout></IsAuth>} />
+      <Route path="/profile/edit" element={<IsAuth><MainLayout><ProfileEdit /></MainLayout></IsAuth>} />
+      <Route path="/profile/:uid" element={<IsAuth><MainLayout><Profile /></MainLayout></IsAuth>} />
+      <Route path="/admin" element={<IsAuth><MainLayout><AdminIndex /></MainLayout></IsAuth>} />
+      <Route path="/admin/addgame" element={<IsAuth><MainLayout><AddGame /></MainLayout></IsAuth>} />
+      <Route path="/admin/editgame/:uid" element={<IsAuth><MainLayout><EditGame /></MainLayout></IsAuth>} />
+      <Route path="/admin/addplan" element={<IsAuth><MainLayout><AddPlans /></MainLayout></IsAuth>} />
+      <Route path="/admin/editplan/:uid" element={<IsAuth><MainLayout><EditGame /></MainLayout></IsAuth>} />
+      <Route path="/options" element={<IsAuth><MainLayout><Options /></MainLayout></IsAuth>} />
+      <Route path="game/:uid" element={<IsAuth><MainLayout><Game /></MainLayout></IsAuth>} />
     </Routes>
   );
 };
