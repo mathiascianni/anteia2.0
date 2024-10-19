@@ -73,7 +73,8 @@ export const completeBadges = async (userId, badgeName) => {
     const userRef = doc(firestore, "users", userId);
     const userSnap = await getDoc(userRef);
     const badgeData = await searchBadgeForName(badgeName);
-
+    console.log(badgeData);
+    
     if (!badgeData) {
       console.log(`No se encontró la insignia con el nombre: ${badgeName}`);
       return;
@@ -82,13 +83,24 @@ export const completeBadges = async (userId, badgeName) => {
     if (userSnap.exists()) {
       const userData = userSnap.data();
       const currentStatus = userData.badges && userData.badges[badgeData.id];
+      console.log(userData.badges);
+
+      // Verifica si userData.badges es un array o un objeto
+      const badges = userData.badges || {};
+      const badgeExists = Array.isArray(badges) 
+        ? badges.some(badge => badge.id === badgeData.id) 
+        : badges[badgeData.id] !== undefined;
+
+      if (badgeExists) {
+        console.log(`La insignia '${badgeName}' ya existe en el usuario.`);
+        return; // Si ya existe, no hacer nada
+      }
 
       await updateDoc(userRef, {
         [`badges.${badgeData.id}`]: badgeData
       });
 
       localStorage.setItem(`badgeCondition`, true);
-
       localStorage.setItem(`badge`, JSON.stringify(badgeData));
 
       console.log(`Insignia '${badgeName}' actualizada a ${!currentStatus}.`);
@@ -496,6 +508,9 @@ export const getAllNotifications = async (notificationsRef) => {
     throw error;
   }
 };
+
+
+
 
 
 
