@@ -39,7 +39,7 @@ const Chat = () => {
                 setChatId(chatId);
     
                 return onSnapshot(
-                    query(collection(chatRef, 'messages'), orderBy('timestamp', 'asc')),
+                    query(collection(chatRef, 'messages'),orderBy('timestamp', 'asc')),
                     snapshot => setMessages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
                 );
             } catch (error) {
@@ -56,15 +56,6 @@ const Chat = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    useEffect(() => {
-        const messaging = getMessaging();
-        const unsubscribe = onMessage(messaging, (payload) => {
-            console.log('Notificación recibida:', payload);
-        });
-
-        return () => unsubscribe();
-    }, []);
-
     const sendMessage = async (e) => {
         e.preventDefault();
         if (newMessage.trim() === '' || !chatId || !currentUser) return;
@@ -76,7 +67,7 @@ const Chat = () => {
                 timestamp: serverTimestamp(),
                 view:false
             });
-            await sendNotification(newMessage, currentUser.uid, userId)
+            await sendNotification(newMessage, currentUser.uid, userId, 'message')
             setNewMessage('');
         } catch (error) {
             console.error('Error al enviar el mensaje:', error);

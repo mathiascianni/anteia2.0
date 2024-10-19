@@ -1,8 +1,8 @@
 import { BackBtn, Bell } from "../../Icons";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { auth, getNotifications, getUserById } from "../../credentials";
-import { collection, orderBy, query, onSnapshot, doc, getFirestore as firestore } from "firebase/firestore";
+import { auth, getUserById, firestore as firebaseFirestore } from "../../credentials";
+import { collection, orderBy, query, onSnapshot, doc } from "firebase/firestore";
 import Toast from "../Home/Toast";
 
 const TopBar = ({ backBtn, title, bell }) => {
@@ -22,19 +22,41 @@ const TopBar = ({ backBtn, title, bell }) => {
     useEffect(() => {
         if (bell) {
             const fetchNotiData = async () => {
-                const notiRef = await getNotifications();
-                setNotifications(notiRef);
-
-
-                const users = await Promise.all(notiRef.map(async (notification) => {
-                    const user = await getUserById(notification.sender);
-                    return user;
-                }));
-                setUserData(users);
+                const user = auth.currentUser; 
+                if (user) { 
+                    const userId = user.uid;
+                    const userRef = doc(firebaseFirestore, 'users', userId);
+                    const notificationsRef = collection(userRef, 'notifications'); // Asegúrate de que userRef sea válido
+                    
+                    let notifications = []; 
+                    
+                    return onSnapshot(
+                      query(notificationsRef, orderBy('timestamp', 'asc')),
+                      snapshot => {
+                        notifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        setNotifications(notifications);
+                      }
+                    );
+                } else {
+                    console.error("Usuario no autenticado");
+                }
             };
             fetchNotiData();
         }
     }, [bell]);
+
+    useEffect(() => {
+        const fetchUsersData = async () => {
+            if (notifications) { // Asegúrate de que notifications esté definido
+                const users = await Promise.all(notifications.map(async (notification) => {
+                    const user = await getUserById(notification.sender);
+                    return user;
+                }));
+                setUserData(users);
+            }
+        }
+        fetchUsersData();
+    }, [notifications]); // Agrega notifications como dependencia
 
     return (
         <div className='h-menu flex items-center justify-between relative'>

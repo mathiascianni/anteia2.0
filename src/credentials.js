@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, updateEmail, updateProfile } from "firebase/auth";
-import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion, addDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion, addDoc, orderBy } from 'firebase/firestore';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getDatabase, update } from "firebase/database";
@@ -76,20 +76,20 @@ export const completeBadges = async (userId, badgeName) => {
 
     if (!badgeData) {
       console.log(`No se encontró la insignia con el nombre: ${badgeName}`);
-      return; 
+      return;
     }
-    
+
     if (userSnap.exists()) {
       const userData = userSnap.data();
       const currentStatus = userData.badges && userData.badges[badgeData.id];
 
       await updateDoc(userRef, {
-        [`badges.${badgeData.id}`]: badgeData 
+        [`badges.${badgeData.id}`]: badgeData
       });
 
-      localStorage.setItem(`badgeCondition`, true); 
+      localStorage.setItem(`badgeCondition`, true);
 
-      localStorage.setItem(`badge`, JSON.stringify(badgeData)); 
+      localStorage.setItem(`badge`, JSON.stringify(badgeData));
 
       console.log(`Insignia '${badgeName}' actualizada a ${!currentStatus}.`);
     } else {
@@ -102,8 +102,8 @@ export const completeBadges = async (userId, badgeName) => {
 
 
 export const ChangeCondition = async () => {
-    localStorage.setItem('badgeCondition', false);
-    console.log('badgeCondition cambiado a false en localStorage.');
+  localStorage.setItem('badgeCondition', false);
+  console.log('badgeCondition cambiado a false en localStorage.');
 };
 
 
@@ -295,18 +295,18 @@ export const matchsUser = async (currentUserId, userFollowId) => {
 export const createChat = async (currentUserId, userFollowId) => {
   let chatRef = doc(firestore, 'chats', `${currentUserId}_${userFollowId}`);
   let chatDoc = await getDoc(chatRef);
- 
+
   if (chatDoc.exists()) {
     console.log('El chat ya existe, no se creará uno nuevo.');
-    return false; 
+    return false;
   }
 
   chatRef = doc(firestore, 'chats', `${userFollowId}_${currentUserId}`);
   chatDoc = await getDoc(chatRef);
-  
+
   if (chatDoc.exists()) {
     console.log('El chat ya existe en la otra dirección, no se creará uno nuevo.');
-    return false; 
+    return false;
   }
 
   await setDoc(chatRef, { participants: [currentUserId, userFollowId], [currentUserId]: true, [userFollowId]: false }, { merge: true });
@@ -471,29 +471,17 @@ export const AddRecomendation = async (userLikedId) => {
   return userLiked;
 };
 
-export const sendNotification = async (message, currentUser, userSend) => {
+export const sendNotification = async (message, currentUser, userSend, status) => {
   try {
     await addDoc(collection(doc(firestore, 'users', userSend), 'notifications'), {
       message,
       sender: currentUser,
-      timestamp: new Date()
+      timestamp: new Date(),
+      status: status
     });
     console.log('Notificación enviada exitosamente.');
   } catch (error) {
     console.error('Error al enviar la notificación:', error);
-  }
-};
-
-export const getNotifications = async () => {
-  const userId = auth.currentUser.uid
-  try {
-    const notificationsRef = collection(doc(firestore, 'users', userId), 'notifications');
-    const querySnapshot = await getDocs(notificationsRef);
-    const notifications = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return notifications;
-  } catch (error) {
-    console.error('Error al obtener las notificaciones:', error);
-    throw error;
   }
 };
 
@@ -508,6 +496,9 @@ export const getAllNotifications = async (notificationsRef) => {
     throw error;
   }
 };
+
+
+
 
 
 
