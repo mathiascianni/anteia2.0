@@ -17,6 +17,8 @@ import Chat from "../pages/Chat";
 //Middlewares
 import IsAuth from "../middlewares/IsAuth";
 import SliderMatchs from "../pages/SliderMatchs";
+import ProfileConf from "../pages/ProfileConf";
+import IsMatch from "../middlewares/IsMatch";
 
 
 const MainRoutes = () => {
@@ -28,9 +30,10 @@ const MainRoutes = () => {
       <Route path="/profile" element={<IsAuth><MainLayout><MyProfile /></MainLayout></IsAuth>} />
       <Route path="/matchs" element={<IsAuth><MainLayout><SliderMatchs/></MainLayout></IsAuth>} />
       <Route path="/chats" element={<IsAuth><MainLayout><ListChats/></MainLayout></IsAuth>} />
-      <Route path="/chats/:userId" element={<IsAuth><MainLayout><Chat /></MainLayout></IsAuth>} />
+      <Route path="/chats/:userId" element={<IsMatch><IsAuth><MainLayout><Chat /></MainLayout></IsAuth></IsMatch>} />
       <Route path="/profile/edit" element={<IsAuth><MainLayout><ProfileEdit /></MainLayout></IsAuth>} />
       <Route path="/profile/:uid" element={<IsAuth><MainLayout><Profile /></MainLayout></IsAuth>} />
+      <Route path="/profile/:uid/configuration" element={<IsAuth><MainLayout><ProfileConf /></MainLayout></IsAuth>} />
       <Route path="/admin" element={<IsAuth><MainLayout><AdminIndex /></MainLayout></IsAuth>} />
       <Route path="/admin/addgame" element={<IsAuth><MainLayout><AddGame /></MainLayout></IsAuth>} />
       <Route path="/admin/editgame/:uid" element={<IsAuth><MainLayout><EditGame /></MainLayout></IsAuth>} />

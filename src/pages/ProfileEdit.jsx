@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { auth, completeBadges, getUserById, storage, updateAuthUserProfile, updateUserProfile } from '../credentials';
+import { auth, completeBadges, getUserById, storage, updateAuthUserProfile, updateUserProfile, uploadImage } from '../credentials';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import Input from '../components/Auth/Input';
 import Button from '../components/Auth/Button';
 import { SpinnerLoader } from '../components/General';
 import Checkbox from '../components/Auth/Checkbox';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileEdit = () => {
     const [authUser, setAuthUser] = useState(null);
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [banner, setBanner] = useState('');
     const [profileImage, setProfileImage] = useState(null);
-    const [showPassword, setShowPassword] = useState(false); // Nuevo estado para controlar el checkbox
+    const navigate = useNavigate();
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => setAuthUser(user));
@@ -48,13 +48,6 @@ const ProfileEdit = () => {
             let profileDownloadURL = profileImage;
             let bannerDownloadURL = banner;
 
-            const uploadImage = async (image, path) => {
-                const blob = await fetch(image).then(res => res.blob());
-                const storageRef = ref(storage, `users/${authUser.uid}/${path}`);
-                const snapshot = await uploadBytes(storageRef, blob, { contentType: 'image/png' });
-                return await getDownloadURL(snapshot.ref);
-            };
-
             if (profileImage && profileImage.startsWith('data:')) {
                 profileDownloadURL = await uploadImage(profileImage, 'profile.png');
             }
@@ -72,7 +65,7 @@ const ProfileEdit = () => {
 
             await updateAuthUserProfile(username, profileDownloadURL, email);
             await completeBadges(authUser.uid, 'Primer Cambio');
-            console.log('Profile updated successfully!');
+            return navigate('/profile')
         } catch (error) {
             console.error('Error updating profile:', error);
         }
@@ -102,13 +95,6 @@ const ProfileEdit = () => {
                             <input type="file" id='banner' name='banner' className='hidden' onChange={handleFileChange(setBanner)} />
                             {banner && <img className='rounded-md' htmlFor="banner" src={banner} alt="Banner" />}
                         </label>
-                        <Checkbox text={"Cambiar contraseña"} onChange={() => setShowPassword(!showPassword)} />
-                        {showPassword && (
-                            <div className='space-y-4'>
-                                <Input title="Contraseña" type="password" value={password} onChange={handleInputChange(setPassword)} />
-                                <Input title="Nueva contraseña" type="password" value={password} onChange={handleInputChange(setPassword)} />
-                            </div>
-                        )}
                         <Button text="Update Profile" handleSubmit={handleUpdateProfile} />
                     </form>
                 </>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { firestore, auth, getUserById, sendNotification } from '../credentials';
 import { collection, addDoc, doc, getDoc, setDoc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -13,6 +13,7 @@ const Chat = () => {
     const messagesEndRef = useRef(null);
     const { userId } = useParams();
     const currentUser = auth.currentUser;
+    const location = useLocation();
 
     useEffect(() => {
         if (!userId) return;
@@ -21,23 +22,23 @@ const Chat = () => {
 
     useEffect(() => {
         if (!currentUser || !recipient) return;
-    
+
         const fetchChatData = async () => {
             try {
                 let chatRef = doc(firestore, 'chats', `${currentUser.uid}_${recipient.id}`);
-                let chatDoc = await getDoc(chatRef); 
+                let chatDoc = await getDoc(chatRef);
                 console.log(chatDoc.id);
-    
+
                 if (!chatDoc.exists()) {
                     chatRef = doc(firestore, 'chats', `${recipient.id}_${currentUser.uid}`);
                     chatDoc = await getDoc(chatRef);
                     console.log(chatDoc.id);
                 }
-    
-                let chatId = chatDoc.id; 
-    
+
+                let chatId = chatDoc.id;
+
                 setChatId(chatId);
-    
+
                 return onSnapshot(
                     query(collection(chatRef, 'messages'), orderBy('timestamp', 'asc')),
                     snapshot => setMessages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
@@ -46,24 +47,15 @@ const Chat = () => {
                 console.error("Error fetching chat data:", error);
             }
         };
-    
-        fetchChatData(); 
-    
+
+        fetchChatData();
+
     }, [currentUser, recipient]);
-    
+
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
-
-    useEffect(() => {
-        const messaging = getMessaging();
-        const unsubscribe = onMessage(messaging, (payload) => {
-            console.log('Notificación recibida:', payload);
-        });
-
-        return () => unsubscribe();
-    }, []);
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -74,9 +66,12 @@ const Chat = () => {
                 text: newMessage,
                 sender: currentUser.uid,
                 timestamp: serverTimestamp(),
-                view:false
+                view: false
             });
-            await sendNotification(newMessage, currentUser.uid, userId)
+
+            await sendNotification(newMessage, currentUser.uid, userId, 'message');
+
+
             setNewMessage('');
         } catch (error) {
             console.error('Error al enviar el mensaje:', error);
@@ -84,12 +79,12 @@ const Chat = () => {
     };
     return (
         <div className="mx-auto border border-gray-200 flex flex-col">
-            <div className="bg-primary text-white p-4 flex items-center">
+            <div className="bg-primary text-white p-4">
                 {recipient ? (
-                    <>
+                    <Link to={`/profile/${recipient.id}`} className='flex items-center'>
                         <img src={recipient.photoURL || 'https://via.placeholder.com/50'} alt={recipient.displayName} className="w-10 h-10 rounded-full mr-3" />
                         <h2 className="text-xl font-semibold">{recipient.displayName || recipient.email}</h2>
-                    </>
+                    </Link>
                 ) : (
                     <h2 className="text-xl font-semibold">Cargando...</h2>
                 )}
@@ -123,9 +118,6 @@ const Chat = () => {
                         placeholder="Escribe un mensaje..."
                         className="flex-grow px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                    <button type="submit" className="ml-2 px-6 py-2 bg-primary text-white rounded-full hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                        Enviar
-                    </button>
                 </form>
             </div>
         </div>

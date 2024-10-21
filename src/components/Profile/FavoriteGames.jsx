@@ -9,8 +9,8 @@ const FavoriteGames = ({ user, title }) => {
             {
                 user.games && user.games.length > 0 ?
                     <div className='grid grid-cols-3 gap-1'>
-                        {user.games.map((game) => (
-                            <IconGame game={game}/>
+                        {user.games.map((game, index) => (
+                            <IconGame game={game} index={index}/>
                         ))}
                     </div>
                     :

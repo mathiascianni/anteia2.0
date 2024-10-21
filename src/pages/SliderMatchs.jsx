@@ -6,47 +6,52 @@ import { Badge, EmptyStar, Heart, Star, Thumb } from '../Icons';
 import { FavoriteGames } from '../components/Profile';
 import IconGame from '../Icons/IconGame';
 import { useNavigate } from 'react-router-dom';
+import { useSwipeable } from 'react-swipeable';
+import { SpinnerLoader } from '../components/General';
 
 const SliderMatchs = () => {
     const [users, setUsers] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [loading, setLoading] = useState(true);
     const cardRef = useRef(null);
     const auth = getAuth();
     const currentUserId = auth.currentUser ? auth.currentUser.uid : null;
     const navigate = useNavigate();
 
-
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const dataUsers = await getDataDB('users');
-                const filteredUsers = dataUsers.filter(user => user.id !== currentUserId);
-                setUsers(filteredUsers);
+                const filteredUsers = await Promise.all(dataUsers.map(async (user) => {
+                    const followStatus = await checkFollowStatus(user.id);
+                    return followStatus !== 1 && user.id !== currentUserId ? user : null;
+                }));
+
+                // Filtra los usuarios nulos
+                setUsers(filteredUsers.filter(user => user !== null));
             } catch (error) {
                 console.error('Error fetching users:', error);
+            } finally {
+                setLoading(false); // Finaliza el estado de carga
             }
         };
 
         fetchData();
     }, [currentUserId]);
 
-
     const handleSwipe = async (direction, currentUserId, targetUserId) => {
         const card = cardRef.current;
-
 
         if (direction === 'right') {
             card.style.transition = 'transform 0.3s ease';
             card.style.transform = 'translateX(100%)';
-            const status = await checkFollowStatus()
-            console.log(status)
             await createChat(currentUserId, targetUserId);
-            navigate(`/profile/${targetUserId}`); 
+            navigate(`/profile/${targetUserId}`);
         } else if (direction === 'left') {
             card.style.transition = 'transform 0.3s ease';
             card.style.transform = 'translateX(-100%)';
         }
-
 
         setTimeout(() => {
             setCurrentIndex((prevIndex) =>
@@ -57,19 +62,28 @@ const SliderMatchs = () => {
         }, 300);
     };
 
+    const handlers = useSwipeable({
+        onSwipedLeft: () => handleSwipe('left', currentUserId, users[currentIndex].id),
+        onSwipedRight: () => handleSwipe('right', currentUserId, users[currentIndex].id),
+        preventDefaultTouchmoveEvent: true,
+        trackMouse: true
+    });
+
     return (
-        <div>
+        <div {...handlers}>
             <div className='px-4'>
                 <TopBar bell backBtn />
             </div>
 
-
-            {users.length > 0 ? (
+            {loading ? (
+                <SpinnerLoader />
+            ) : users.length > 0 ? (
                 <div className='px-4'>
-                    <div className=' rounded-xl bg-primary-dark h-[calc(100vh-25vh)] pt-4 text-white'>
+                    <div className='rounded-xl bg-primary-dark h-[calc(100vh-25vh)] pt-4 text-white'>
                         <div
                             ref={cardRef}
                             className='card w-full h-64'
+                            style={{ transition: 'transform 0.3s ease' }}
                         >
                             <div className='w-[50%] mx-auto'>
                                 <img
@@ -89,8 +103,8 @@ const SliderMatchs = () => {
                                 <div className='w-3/4'>
                                     <h3 className="text-md font-bold pb-2">Intereses</h3>
                                     <div className='grid grid-cols-3 gap-2'>
-                                        {users[currentIndex].games.map((game) => (
-                                            <img className='w-[80%]' src={game.icon} alt="" />
+                                        {users[currentIndex].games.map((game, index) => (
+                                            <img key={index} className='w-[80%]' src={game.icon} alt="" />
                                         ))}
                                     </div>
                                 </div>
@@ -99,24 +113,8 @@ const SliderMatchs = () => {
                                     <ul>
                                         <li className="flex items-center text-[12px] gap-1">Cantidad de matchs: <span className='text-white font-bold'>{users[currentIndex].matchs?.length || 0}</span></li>
                                         <li className="flex items-center text-[12px] gap-1">Cantidad de likes: <span className='text-white font-bold'>{users[currentIndex].recommendations?.length || 0}</span></li>
-                                      
                                     </ul>
                                 </div>
-                            </div>
-
-                            <div className="flex justify-between mt-4">
-                                <button
-                                    className="bg-red-500 text-white w-[7rem] h-[7rem] rounded-full flex items-center border-[10px] border-white justify-center"
-                                    onClick={() => handleSwipe('left', currentUserId, users[currentIndex].id)}
-                                >
-                                    Dislike
-                                </button>
-                                <button
-                                    className="bg-green-500 text-white w-[7rem] h-[7rem] rounded-full flex items-center border-[10px] border-white justify-center"
-                                    onClick={() => handleSwipe('right', currentUserId, users[currentIndex].id)}
-                                >
-                                    Like
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -124,8 +122,6 @@ const SliderMatchs = () => {
             ) : (
                 <p>No hay usuarios disponibles</p>
             )}
-
-
         </div>
     );
 };

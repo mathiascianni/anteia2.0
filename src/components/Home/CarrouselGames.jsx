@@ -18,7 +18,7 @@ const CarrouselGames = () => {
 
     return (
         <div>
-            <h1>Carrousel de juegos</h1>
+            <h2 className='font-bold text-lg mb-2 '>Carrousel de juegos</h2>
             <div className='grid grid-cols-4 my-4'>
                 {games.map((game) => (
                     <Link to={`/game/${game.id}`} key={game.id} className='bg-primary flex items-center w-16 h-16 rounded-full '>

@@ -1,19 +1,27 @@
-import useAuth from "../hooks/useAuth"
-import { Navigate } from "react-router-dom"
-import { useUser } from "../context/User/UserContext"
+import { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { SpinnerLoader } from "../components/General";
 
 const IsAuth = ({ children }) => {
-    const { user } = useUser();
+    const [user, setUser] = useState(null); 
+    const [loading, setLoading] = useState(true); 
 
-    if (!user) {
-        return <Navigate to="/login" />
+    useEffect(() => {
+        const storedUserId = localStorage.getItem('userId');
+        if (storedUserId) {
+            setUser({ uid: storedUserId });
+        }
+        setLoading(false); 
+    }, []);
+
+    if (loading) {
+        return <SpinnerLoader/>;
     }
+    
+    if (!user) {
+        return <Navigate to="/login" />;
+    }
+    return <>{children}</>;
+};
 
-    return (
-        <>
-            {children}
-        </>
-    )
-}
-
-export default IsAuth
+export default IsAuth;

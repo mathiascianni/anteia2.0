@@ -1,11 +1,11 @@
 import { BackBtn, Bell } from "../../Icons";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { auth, getNotifications, getUserById } from "../../credentials";
-import { collection, orderBy, query, onSnapshot, doc, getFirestore as firestore } from "firebase/firestore";
+import { auth, getUserById, firestore as firebaseFirestore } from "../../credentials";
+import { collection, orderBy, query, onSnapshot, doc } from "firebase/firestore";
 import Toast from "../Home/Toast";
 
-const TopBar = ({ backBtn, title, bell }) => {
+const TopBar = ({ backBtn, title, bell, icon }) => {
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,19 +22,41 @@ const TopBar = ({ backBtn, title, bell }) => {
     useEffect(() => {
         if (bell) {
             const fetchNotiData = async () => {
-                const notiRef = await getNotifications();
-                setNotifications(notiRef);
+                const user = auth.currentUser;
+                if (user) {
+                    const userId = user.uid;
+                    const userRef = doc(firebaseFirestore, 'users', userId);
+                    const notificationsRef = collection(userRef, 'notifications');
 
+                    let notifications = [];
 
-                const users = await Promise.all(notiRef.map(async (notification) => {
-                    const user = await getUserById(notification.sender);
-                    return user;
-                }));
-                setUserData(users);
+                    return onSnapshot(
+                        query(notificationsRef, orderBy('timestamp', 'asc')),
+                        snapshot => {
+                            notifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            setNotifications(notifications);
+                        }
+                    );
+                } else {
+                    console.error("Usuario no autenticado");
+                }
             };
             fetchNotiData();
         }
     }, [bell]);
+
+    useEffect(() => {
+        const fetchUsersData = async () => {
+            if (notifications) {
+                const users = await Promise.all(notifications.map(async (notification) => {
+                    const user = await getUserById(notification.sender);
+                    return user;
+                }));
+                setUserData(users);
+            }
+        }
+        fetchUsersData();
+    }, [notifications]);
 
     return (
         <div className='h-menu flex items-center justify-between relative'>
@@ -45,6 +67,14 @@ const TopBar = ({ backBtn, title, bell }) => {
                 >
                     <BackBtn />
                 </button>
+            )}
+            {icon && (
+                <img
+                    className='text-primary absolute block left-0 top-1/2 -translate-y-1/2'
+                    src="./assets/icon.svg"
+                    alt="Anteia"
+                >
+                </img>
             )}
 
             {title && <h1 className='text-2xl font-titles font-thin flex-1 text-center'>{title}</h1>}
