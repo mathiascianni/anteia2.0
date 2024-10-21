@@ -1,9 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, updateEmail, updateProfile } from "firebase/auth";
-import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion, addDoc, orderBy } from 'firebase/firestore';
+import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion, addDoc, orderBy, limit, arrayRemove } from 'firebase/firestore';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL, uploadString } from 'firebase/storage';
 import { getDatabase, update } from "firebase/database";
 import { getDocs, where } from 'firebase/firestore';
 
@@ -74,7 +74,7 @@ export const completeBadges = async (userId, badgeName) => {
     const userSnap = await getDoc(userRef);
     const badgeData = await searchBadgeForName(badgeName);
     console.log(badgeData);
-    
+
     if (!badgeData) {
       console.log(`No se encontró la insignia con el nombre: ${badgeName}`);
       return;
@@ -87,8 +87,8 @@ export const completeBadges = async (userId, badgeName) => {
 
       // Verifica si userData.badges es un array o un objeto
       const badges = userData.badges || {};
-      const badgeExists = Array.isArray(badges) 
-        ? badges.some(badge => badge.id === badgeData.id) 
+      const badgeExists = Array.isArray(badges)
+        ? badges.some(badge => badge.id === badgeData.id)
         : badges[badgeData.id] !== undefined;
 
       if (badgeExists) {
@@ -169,6 +169,20 @@ export const updateUserProfile = async (userId, userData) => {
   }
 };
 
+export const uploadImageToStorage = async (imageData, displaName, fileName) => {
+  const storageRef = ref(storage, `users/${displaName}/${fileName}`);
+  await uploadString(storageRef, imageData, 'data_url');
+  return await getDownloadURL(storageRef);
+};
+
+export const uploadImage = async (image, path) => {
+  const currentUser = auth.currentUser
+  const blob = await fetch(image).then(res => res.blob());
+  const storageRef = ref(storage, `users/${currentUser.displayName}/${path}`);
+  const snapshot = await uploadBytes(storageRef, blob, { contentType: 'image/png' });
+  return await getDownloadURL(snapshot.ref);
+};
+
 // Actualiza el perfil del usuario en Firebase Authentication
 export const updateAuthUserProfile = async (displayName, photoURL, email) => {
   const auth = getAuth();
@@ -217,7 +231,7 @@ export async function getDataDB(table) {
 // Agrega datos a un array en un documento de usuario en Firestore, verificando si el juego ya existe
 export const addDataArrayDB = async (data, path) => {
   const auth = getAuth();
-  const userId = auth.currentUser.uid;
+  const userId = localStorage.getItem('userId')
   const userRef = doc(firestore, 'users', userId);
   const userDoc = await getDoc(userRef);
 
@@ -289,6 +303,7 @@ export const matchsUser = async (currentUserId, userFollowId) => {
     console.log(currentUserId, userFollowId)
     const currentUserRef = doc(firestore, 'users', currentUserId);
     const userFollowRef = doc(firestore, 'users', userFollowId)
+
     await updateDoc(userFollowRef, {
       matchs: arrayUnion(currentUserId)
     });
@@ -345,8 +360,10 @@ export const checkFollowStatus = async (currentUserId, userFollowId) => {
       return 2;
     } else if (exists2) {
       return 3;
-    } else {
+    } else if (!chatDoc.exists()) {
       return 4;
+    } else if (!exists1 && !exists2) {
+      return 5
     }
   } catch (error) {
     console.error('Error al verificar el seguimiento:', error);
@@ -355,7 +372,7 @@ export const checkFollowStatus = async (currentUserId, userFollowId) => {
 };
 
 
-export const changeFollowStatus = async (currentUserId, userFollowId) => {
+export const changeFollowStatusTrue = async (currentUserId, userFollowId) => {
   let chatRef = doc(firestore, 'chats', `${currentUserId}_${userFollowId}`);
   let chatDoc = await getDoc(chatRef);
 
@@ -370,8 +387,37 @@ export const changeFollowStatus = async (currentUserId, userFollowId) => {
     await updateDoc(chatRef, {
       [currentUserId]: true
     });
+    await completeBadges(currentUserId, 'Primer Amigo');
   }
 }
+
+export const changeFollowStatusFalse = async (currentUserId, userFollowId) => {
+  let chatRef = doc(firestore, 'chats', `${currentUserId}_${userFollowId}`);
+  let chatDoc = await getDoc(chatRef);
+  const currentUserRef = doc(firestore, 'users', currentUserId);
+  const userFollowRef = doc(firestore, 'users', userFollowId)
+
+  if (!chatDoc.exists()) {
+    chatRef = doc(firestore, 'chats', `${userFollowId}_${currentUserId}`);
+    chatDoc = await getDoc(chatRef);
+  }
+
+  const exists = chatDoc.data() ? chatDoc.data()[currentUserId] : false;
+
+  if (exists === true) {
+    await updateDoc(chatRef, {
+      [currentUserId]: false,
+      [userFollowId]: false
+    });
+  }
+  await updateDoc(currentUserRef, {
+    matchs: arrayRemove(userFollowId)
+  });
+  await updateDoc(userFollowRef, {
+    matchs: arrayRemove(currentUserId)
+  });
+}
+
 export const getFriends = async (userId) => {
   try {
     const userRef = doc(firestore, 'users', userId);
@@ -393,7 +439,7 @@ export const getFriends = async (userId) => {
 // Recupera datos de los amigos del usuario autenticado desde Firestore
 export async function getMatchsData() {
   const auth = getAuth();
-  const userId = auth.currentUser.uid;
+  const userId = localStorage.getItem('userId')
   const userRef = doc(firestore, 'users', userId);
   const userDoc = await getDoc(userRef);
 
@@ -455,7 +501,7 @@ export const getUserByToken = async (token) => {
 
 export const getUsersByGame = async (gameId) => {
   const auth = getAuth();
-  const currentUserId = auth.currentUser.uid;
+  const currentUserId = localStorage.getItem('userId')
 
   const usersWithGame = await getDataDB('users');
   const usersWithSpecificGame = usersWithGame.filter(user => {
@@ -508,6 +554,48 @@ export const getAllNotifications = async (notificationsRef) => {
     throw error;
   }
 };
+export const getLastMessage = async (usersData, currentUserId) => {
+  const lastMessages = {};
+
+  try {
+
+    for (const user of usersData) {
+      const userFollowId = user.id;
+      let chatRef = doc(firestore, 'chats', `${currentUserId}_${userFollowId}`);
+      let chatDoc = await getDoc(chatRef);
+
+      if (!chatDoc.exists()) {
+        chatRef = doc(firestore, 'chats', `${userFollowId}_${currentUserId}`);
+        chatDoc = await getDoc(chatRef);
+      }
+
+      if (chatDoc.exists()) {
+        console.log("Chat encontrado:", chatRef.id);
+
+        const messagesRef = collection(firestore, `chats/${chatRef.id}/messages`);
+        const q = query(messagesRef, orderBy('timestamp', 'desc'), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const lastMessageDoc = querySnapshot.docs[0];
+          const lastMessageData = lastMessageDoc.data();
+          console.log("Último mensaje:", lastMessageData);
+          lastMessages[user.id] = lastMessageData.text || 'No content';
+        } else {
+          lastMessages[user.id] = 'No messages yet';
+        }
+      } else {
+        console.log("No se encontró un chat entre los usuarios:", currentUserId, userFollowId);
+        lastMessages[user.id] = 'No messages yet';
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching users or chat data:', error);
+  }
+
+  return lastMessages;
+};
+
 
 
 

@@ -6,6 +6,7 @@ import { SpinnerLoader } from '../components/General';
 import { Link } from 'react-router-dom';
 import { TopBar } from '../components/Navigation';
 import { getAuth } from 'firebase/auth';
+import UserList from '../components/Home/userList';
 
 const Home = () => {
   const auth = getAuth();
@@ -39,15 +40,9 @@ const Home = () => {
 
   return (
     <div className="mx-auto px-4">
-      <TopBar bell />
-      <h1>Usuarios con mas matchs</h1>
-      <ul>
-        {users.map((user) => (
-          <Link to={`/profile/${user.id}`} className='block' key={user.id}>
-            <UserCard key={user.id} user={user} />
-          </Link>
-        ))}
-      </ul>
+      <TopBar bell icon />
+      <h2 className='font-bold text-lg mb-2 '>Usuarios con mas matchs</h2>
+      <UserList users={users} />
       <CarrouselGames />
     </div>
   );

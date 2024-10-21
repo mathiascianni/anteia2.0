@@ -21,7 +21,6 @@ const ListAdmin = ({table, addRoute, editRoute, title, secondTable}) => {
     const handleDelete = async (dataId) => {
       try {
         await deleteDataDB(`${table}/${dataId}`);
-        console.log('Plan eliminado correctamente');
         setData(data.filter((data) => data.id !== dataId));
       } catch (error) {
         console.error('Error al eliminar el Plan:', error);

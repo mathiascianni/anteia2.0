@@ -31,9 +31,9 @@ const Login = () => {
         try {
             setLoading(true);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const userId = userCredential.user.uid; 
-            localStorage.setItem('userId', userId); 
-            await completeBadges(userId, 'Bienvenido')
+            const userId = userCredential.user.uid;
+            localStorage.setItem('userId', userId);
+            await completeBadges(userId, 'Bienvenido');
             setError("");
             setEmail("");
             setPassword("");
@@ -46,7 +46,6 @@ const Login = () => {
     };
 
     return (
-
         <div className='px-4 pb-8 flex flex-col justify-between min-h-screen'>
             <TopBar title="Iniciar sesión" />
             <div className='flex-1'>
@@ -56,21 +55,21 @@ const Login = () => {
                         <Input title="Contraseña" type="password" value={password} onChange={handlePasswordChange} />
                     </div>
                     {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                    <p className='text-primary text-sm mb-4'>¿Olvidaste tu contraseña?</p>
+                    <Checkbox text="Mantener sesión iniciada" />
+                    <div>
+                        <button
+                            type="submit"
+                            className="text-white bg-primary py-5 rounded-lg mb-8 w-full"
+                            disabled={loading}
+                        >
+                            Iniciar sesión
+                        </button>
+                        <div className='text-center'>
+                            <label>¿No tienes una cuenta? <span onClick={() => navigate("/register")} className='text-primary font-bold'>Crear cuenta</span></label>
+                        </div>
+                    </div>
                 </form>
-                <p className='text-primary text-sm'>¿Olvidaste tu contraseña?</p>
-                <Checkbox text="Mantener sesión iniciada" />
-            </div>
-            <div className='w-full flex flex-col'>
-                <button
-                    className="text-white bg-primary py-5 rounded-lg mb-8"
-                    onClick={handleSubmit}
-                    disabled={loading}
-                >
-                    Iniciar sesión
-                </button>
-
-                <label className='text-center'>¿No tienes una cuenta? <span onClick={() => navigate("/register")} className='text-primary font-bold'>Crear cuenta</span></label>
-
             </div>
         </div>
     );

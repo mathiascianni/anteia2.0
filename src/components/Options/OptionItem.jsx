@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const OptionItem = ({ text = '', link = '', onClick = () => {} }) => {
     return (
-        <li>
+        <li className='my-4'>
             <Link 
                 to={link} 
                 onClick={onClick} 

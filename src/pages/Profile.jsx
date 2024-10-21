@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { auth, changeGameCondition, completeBadges, getDataDB, getUserById, checkFollowStatus, changeFollowStatus, createChat, matchsUser, searchBadgeForName, sendNotification } from '../credentials';
+import { auth, changeGameCondition, completeBadges, getDataDB, getUserById, checkFollowStatus, createChat, matchsUser, searchBadgeForName, sendNotification, changeFollowStatusTrue } from '../credentials';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { EditIcon } from '../Icons';
 import UserCard from '../components/Home/UserCard';
@@ -19,7 +19,7 @@ const Profile = () => {
   const [games, setGames] = useState([]);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isFollowing, setIsFollowing] = useState();
-  const [buttonText, setButtonText] = useState('Seguir +'); // Estado para el texto del botón
+  const [buttonText, setButtonText] = useState('Seguir +');
 
   useEffect(() => {
     const getBadges = async () => {
@@ -95,10 +95,11 @@ const Profile = () => {
   const handleFollow = async () => {
     try {
       const currentUser = auth.currentUser;
+      console.log(currentUser)
       if (currentUser) {
         const connectionExists = await checkFollowStatus(currentUser.uid, user.id);
         if (connectionExists === 3) {
-          await changeFollowStatus(currentUser.uid, user.id);
+          await changeFollowStatusTrue(currentUser.uid, user.id);
           await matchsUser(currentUser.uid, user.id);
           const message = `te comenzo a seguir`
           await sendNotification(message, currentUser.uid, user.id, 'follow')
@@ -108,12 +109,16 @@ const Profile = () => {
           const message = `te comenzo a seguir`
           await sendNotification(message, currentUser.uid, user.id, 'follow')
           setIsFollowing(2);
-        } 
+        } else if(connectionExists === 5){
+          await changeFollowStatusTrue(currentUser.uid, user.id);
+          setIsFollowing(2);
+        }
       }
     } catch (error) {
       console.error('Error al seguir al usuario:', error);
     }
-  };
+  }
+    ;
 
   useEffect(() => {
     const checkUserConnection = async () => {
@@ -125,7 +130,7 @@ const Profile = () => {
     };
 
     checkUserConnection();
-  }, [uid, user]); // Eliminar isFollowing de las dependencias para evitar bucles infinitos
+  }, [uid, user]);
 
   if (loading) {
     return <SpinnerLoader />;
@@ -140,7 +145,7 @@ const Profile = () => {
       <div className='px-4 my-4'>
         {isFollowing === 1 ?
           <div className='grid grid-cols-3 gap-2'>
-            <Link className='col-span-1'>
+            <Link to={`/profile/${user.id}/configuration`} className='col-span-1'>
               <Button text={'Conf'} />
             </Link>
             <Link to={`/chats/${user.id}`} className='col-span-2'>
