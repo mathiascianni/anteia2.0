@@ -11,10 +11,7 @@ const Game = () => {
     const [game, setGame] = useState(null);
     const [isGameAdded, setIsGameAdded] = useState(false);
     const [usersWithGame, setUsersWithGame] = useState([]);
-    let userId = localStorage.getItem('userId');
-    if(!userId){
-        userId = sessionStorage.getItem('userId')
-    }
+    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
 
     useEffect(() => {
         const fetchGame = async () => {

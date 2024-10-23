@@ -6,10 +6,8 @@ import { TopBar } from '../components/Navigation';
 const ListChats = () => {
     const [users, setUsers] = useState([]);
     const [chatMessages, setChatMessages] = useState({});
-    let currentUserId = localStorage.getItem('userId')
-    if (!currentUserId) {
-        currentUserId = sessionStorage.getItem('userId')
-      }
+    const currentUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
+      
 
     useEffect(() => {
         const fetchUsers = async () => {

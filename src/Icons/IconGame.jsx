@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const IconGame = ({ game, index, activeGamesCount, setActiveGamesCount }) => {
     const [isConditionActive, setIsConditionActive] = useState(game.condition);
     const [error, setError] = useState(null)
+    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
     const navigate = useNavigate();
     
     useEffect(() => {
@@ -19,11 +20,6 @@ const IconGame = ({ game, index, activeGamesCount, setActiveGamesCount }) => {
             if (!isConditionActive && activeGamesCount >= 3) {
                 setError('Solo puedes seleccionar 3 juegos')
                 return;
-            }
-
-            let userId = localStorage.getItem('userId');
-            if (!userId) {
-                userId = sessionStorage.getItem('userId');
             }
 
             await changeGameCondition(userId, index);

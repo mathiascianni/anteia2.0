@@ -6,10 +6,7 @@ import { firestore } from '../credentials';
 const IsMatch = ({ children }) => {
   const navigate = useNavigate();
   const { userId } = useParams();
-  let currentUserId = localStorage.getItem('userId');
-  if (!currentUserId) {
-    currentUserId = sessionStorage.getItem('userId')
-  }
+  const currentUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
 
   useEffect(() => {
     const checkMatch = async () => {

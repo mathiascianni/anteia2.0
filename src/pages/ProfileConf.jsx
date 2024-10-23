@@ -6,11 +6,9 @@ import { useParams } from 'react-router-dom';
 
 const ProfileConf = () => {
     const { uid } = useParams();
+    const authUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
     const handleUnfollow = async () => {
-        let authUserId = localStorage.getItem('userId')
-        if (!authUserId) {
-            authUserId = sessionStorage.getItem('userId')
-        }
+    
         await changeFollowStatusFalse(authUserId, uid)
         const message = `te dejo de seguir`
         await sendNotification(message, authUserId, uid, 'follow')

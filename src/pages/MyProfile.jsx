@@ -9,13 +9,11 @@ const MyProfile = () => {
 	const [data, setData] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [badges, setBadges] = useState([])
+	const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
 
 	useEffect(() => {
 		const fetchData = async () => {
-			let userId = localStorage.getItem('userId');
-			if (!userId) {
-				userId = sessionStorage.getItem('userId')
-			}
+	
 			const userData = await getUserById(userId);
 			const badgesData = await getDataDB('badges');
 			setBadges(badgesData)
