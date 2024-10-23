@@ -5,25 +5,21 @@ import { SpinnerLoader } from "../components/General";
 const IsAuth = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const storedUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
     useEffect(() => {
-        let storedUserId = localStorage.getItem('userId');
-        if (!storedUserId) {
-            storedUserId = sessionStorage.getItem('userId');
-        }
 
         if (storedUserId) {
             setUser({ uid: storedUserId });
         }
 
-        setLoading(false); 
+        setLoading(false);
     }, []);
 
     if (loading) {
         return <SpinnerLoader />;
     }
 
-   
+
     if (!user) {
         return <Navigate to="/login" />;
     }

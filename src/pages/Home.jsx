@@ -10,15 +10,11 @@ import UserList from '../components/Home/userList';
 import Banner from '../components/Home/Banner';
 
 const Home = () => {
-  let userId = localStorage.getItem('userId');
+  const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [recommendations, setRecommendations] = useState([]);
   const [matchs, setMatchs] = useState([]);
-
-  if (!userId) {
-    userId = sessionStorage.getItem('userId');
-  }
 
   useEffect(() => {
     setLoading(true);

@@ -250,14 +250,11 @@ export async function getDataDB(table) {
 
 // Agrega datos a un array en un documento de usuario en Firestore, verificando si el juego ya existe
 export const addDataArrayDB = async (data, path) => {
-  const auth = getAuth();
-  let userId = sessionStorage.getItem('userId');
+  const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
   const userRef = doc(firestore, 'users', userId);
   const userDoc = await getDoc(userRef);
 
-  if (!userId) {
-    userId = localStorage.getItem('userId');
-  }
+  
 
   if (!userDoc.exists()) {
     throw new Error('El documento del usuario no existe');
@@ -462,13 +459,10 @@ export const getFriends = async (userId) => {
 
 // Recupera datos de los amigos del usuario autenticado desde Firestore
 export async function getMatchsData() {
-  const auth = getAuth();
-  let userId = sessionStorage.getItem('userId')
+  const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
   const userRef = doc(firestore, 'users', userId);
   const userDoc = await getDoc(userRef);
-  if (!userId) {
-    userId = localStorage.getItem('userId');
-  }
+  
 
   if (!userDoc.exists()) {
     throw new Error('El documento del usuario no existe');
@@ -528,10 +522,7 @@ export const getUserByToken = async (token) => {
 
 export const getUsersByGame = async (gameId) => {
   const auth = getAuth();
-  let currentUserId = sessionStorage.getItem('userId')
-  if (!currentUserId) {
-    currentUserId = localStorage.getItem('userId');
-  }
+  const currentUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
 
   const usersWithGame = await getDataDB('users');
   const usersWithSpecificGame = usersWithGame.filter(user => {
