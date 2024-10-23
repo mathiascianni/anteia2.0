@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { addDataArrayDB, getDataDB } from '../credentials';
+import { addDataArrayDB, getDataDB, getUrlsStorage } from '../credentials';
 import UserCard from '../components/Home/UserCard';
 import CarrouselGames from '../components/Home/CarrouselGames';
 import { SpinnerLoader } from '../components/General';
@@ -27,12 +27,12 @@ const Home = () => {
         const datos = await getDataDB('users');
         const usuariosFiltrados = datos.filter(user => user.id !== userId);
         const usuariosRecomendados = usuariosFiltrados.sort((a, b) =>
-          (b.recommendations?.length ?? 0) - (a.recommendations?.length ?? 0) 
-        ).slice(0, 4); 
-       
+          (b.recommendations?.length ?? 0) - (a.recommendations?.length ?? 0)
+        ).slice(0, 4);
+
         const usuariosMatchs = usuariosFiltrados.sort((a, b) =>
-            (b.matchs?.length ?? 0) - (a.matchs?.length ?? 0) 
-          ).slice(0, 4); 
+          (b.matchs?.length ?? 0) - (a.matchs?.length ?? 0)
+        ).slice(0, 4);
 
         setUsers(usuariosFiltrados);
         setRecommendations(usuariosRecomendados);

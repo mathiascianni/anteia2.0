@@ -12,7 +12,7 @@ const ProfileHeader = ({ user, edit, like }) => {
                 }}
             >
                 <div className="w-40 h-40 rounded-full absolute top-24 inset-0 mx-auto border-solid border-white border-8">
-                    <img className='w-40 rounded-full'
+                    <img className='w-40  rounded-full'
                         src={user.photoURL || 'assets/user/avatar.png'}
                         alt="User Profile"
                     />
