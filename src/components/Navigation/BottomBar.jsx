@@ -5,7 +5,7 @@ import { navLinks } from "../../constants/navbar";
 
 const BottomBar = () => {
     return (
-        <div className="py-5 fixed bottom-0 justify-between px-4 w-full flex bg-primary text-light font-body">
+        <div className="py-5 fixed bottom-0 justify-between px-4 w-full flex bg-primary text-light font-body z-10">
             {
                 navLinks.map((item, index) => (
                     <Fragment key={index} >

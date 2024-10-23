@@ -19,12 +19,10 @@ const AdminIndex = () => {
             >
                 <option value="adminGames">Admin Games</option>
                 <option value="dashboard">Dashboard</option>
-                <option value="adminPlans">Admin de planes</option>
             </select>
 
             {selectedComponent === 'adminGames' && <AdminGames />}
             {selectedComponent === 'dashboard' && <Dashboard />}
-            {selectedComponent === 'adminPlans' && <AdminPlans />}
         </div>
     );
 }

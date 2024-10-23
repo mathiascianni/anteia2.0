@@ -6,7 +6,10 @@ import { firestore } from '../credentials';
 const IsMatch = ({ children }) => {
   const navigate = useNavigate();
   const { userId } = useParams();
-  const currentUserId = localStorage.getItem('userId');
+  let currentUserId = localStorage.getItem('userId');
+  if (!currentUserId) {
+    currentUserId = sessionStorage.getItem('userId')
+  }
 
   useEffect(() => {
     const checkMatch = async () => {
@@ -16,23 +19,23 @@ const IsMatch = ({ children }) => {
 
         if (!currentUserDoc.exists()) {
           console.log('Usuario no encontrado');
-          return navigate('/'); 
+          return navigate('/');
         }
 
         const { matchs } = currentUserDoc.data();
 
         if (!matchs || !matchs.includes(userId)) {
           console.log('No tienes match con este usuario');
-          return navigate('/'); 
+          return navigate('/');
         }
       } catch (error) {
         console.error('Error verificando matchs:', error);
-        navigate('/'); 
+        navigate('/');
       }
     };
 
     checkMatch();
-  }, [userId, currentUserId, navigate]); 
+  }, [userId, currentUserId, navigate]);
 
   return <>{children}</>;
 };

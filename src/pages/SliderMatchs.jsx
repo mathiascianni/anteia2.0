@@ -71,19 +71,15 @@ const SliderMatchs = () => {
 
     return (
         <div {...handlers}>
-            <div className='px-4'>
                 <TopBar bell backBtn />
-            </div>
 
             {loading ? (
                 <SpinnerLoader />
             ) : users.length > 0 ? (
                 <div className='px-4'>
-                    <div className='rounded-xl bg-primary-dark h-[calc(100vh-25vh)] pt-4 text-white'>
+                    <div className='rounded-xl bg-primary-dark h-[calc(100vh-25vh)] pt-4 text-white' ref={cardRef} style={{ transition: 'transform 0.3s ease' }}>
                         <div
-                            ref={cardRef}
                             className='card w-full h-64'
-                            style={{ transition: 'transform 0.3s ease' }}
                         >
                             <div className='w-[50%] mx-auto'>
                                 <img

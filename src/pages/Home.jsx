@@ -7,31 +7,44 @@ import { Link } from 'react-router-dom';
 import { TopBar } from '../components/Navigation';
 import { getAuth } from 'firebase/auth';
 import UserList from '../components/Home/userList';
+import Banner from '../components/Home/Banner';
 
 const Home = () => {
-  const auth = getAuth();
+  let userId = localStorage.getItem('userId');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [recommendations, setRecommendations] = useState([]);
+  const [matchs, setMatchs] = useState([]);
+
+  if (!userId) {
+    userId = sessionStorage.getItem('userId');
+  }
 
   useEffect(() => {
     setLoading(true);
     const obtenerUsuarios = async () => {
       try {
         const datos = await getDataDB('users');
-        const usuariosFiltrados = datos.filter(user => user.id !== auth.currentUser.uid);
+        const usuariosFiltrados = datos.filter(user => user.id !== userId);
+        const usuariosRecomendados = usuariosFiltrados.sort((a, b) =>
+          (b.recommendations?.length ?? 0) - (a.recommendations?.length ?? 0) 
+        ).slice(0, 4); 
+       
+        const usuariosMatchs = usuariosFiltrados.sort((a, b) =>
+            (b.matchs?.length ?? 0) - (a.matchs?.length ?? 0) 
+          ).slice(0, 4); 
 
-        const usuariosOrdenados = usuariosFiltrados.sort((a, b) => b.matchs - a.matchs).slice(0, 3);
-
-        setUsers(usuariosOrdenados);
+        setUsers(usuariosFiltrados);
+        setRecommendations(usuariosRecomendados);
+        setMatchs(usuariosMatchs);
         setLoading(false);
       } catch (error) {
         console.error('Error al obtener datos de usuarios:', error);
       }
     };
-    obtenerUsuarios();
-    return () => {
 
-    };
+    obtenerUsuarios();
+    return () => { };
   }, []);
 
   if (loading) {
@@ -39,11 +52,14 @@ const Home = () => {
   }
 
   return (
-    <div className="mx-auto px-4">
+    <div className="mx-auto">
       <TopBar bell icon />
-      <h2 className='font-bold text-lg mb-2 '>Usuarios con mas matchs</h2>
-      <UserList users={users} />
-      <CarrouselGames />
+      <div>
+        <UserList users={recommendations} title={'Usuarios Recomendados'} />
+        <Banner />
+        <CarrouselGames />
+        <UserList users={matchs} title={'Usuarios Matchs'} />
+      </div>
     </div>
   );
 };

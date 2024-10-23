@@ -4,37 +4,40 @@ import { useNavigate } from 'react-router-dom';
 import { firestore } from '../credentials';
 
 const IsAdmin = ({ children }) => {
-    const navigate = useNavigate();
-    const currentUserId = localStorage.getItem('userId');
-  
-    useEffect(() => {
-      const checkMatch = async () => {
-        try {
-          const currentUserRef = doc(firestore, 'users', currentUserId);
-          const currentUserDoc = await getDoc(currentUserRef);
-          const data = currentUserDoc.data();
+  const navigate = useNavigate();
+  let currentUserId = localStorage.getItem('userId');
+  if (!currentUserId) {
+    currentUserId = sessionStorage.getItem('userId')
+  }
 
-          if (!currentUserDoc.exists()) {
-            console.log('Usuario no encontrado');
-            return navigate('/'); 
-          }
+  useEffect(() => {
+    const checkMatch = async () => {
+      try {
+        const currentUserRef = doc(firestore, 'users', currentUserId);
+        const currentUserDoc = await getDoc(currentUserRef);
+        const data = currentUserDoc.data();
 
-          if(data.role !== 'admin'){
-            console.log('No eres admin');
-            return navigate('/'); 
-          }
-  
-          console.log(data)
-  
-        } catch (error) {
-          console.error('Error verificando matchs:', error);
-          navigate('/'); 
+        if (!currentUserDoc.exists()) {
+          console.log('Usuario no encontrado');
+          return navigate('/');
         }
-      };
-  
-      checkMatch();
-    }, [currentUserId, navigate]); 
-  
-    return <>{children}</>;
-  };
+
+        if (data.role !== 'admin') {
+          console.log('No eres admin');
+          return navigate('/');
+        }
+
+        console.log(data)
+
+      } catch (error) {
+        console.error('Error verificando matchs:', error);
+        navigate('/');
+      }
+    };
+
+    checkMatch();
+  }, [currentUserId, navigate]);
+
+  return <>{children}</>;
+};
 export default IsAdmin;

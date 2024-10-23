@@ -11,7 +11,10 @@ const Game = () => {
     const [game, setGame] = useState(null);
     const [isGameAdded, setIsGameAdded] = useState(false);
     const [usersWithGame, setUsersWithGame] = useState([]);
-    const userId = localStorage.getItem('userId');
+    let userId = localStorage.getItem('userId');
+    if(!userId){
+        userId = sessionStorage.getItem('userId')
+    }
 
     useEffect(() => {
         const fetchGame = async () => {
@@ -46,9 +49,9 @@ const Game = () => {
         : {};
     return (
         <div>
-            <div className='px-4'>
+           
                 <TopBar backBtn bell />
-            </div>
+            
 
             <div
                 className={`border-b-2 text-white text-center pt-44 relative bg-cover bg-center bg-primary`}
@@ -56,7 +59,7 @@ const Game = () => {
                     backgroundImage: `url(${game.banner})`
                 }}
             >
-                <div className="w-40 h-40 rounded-full flex items-center justify-center bg-primary absolute top-24 inset-0 mx-auto border-solid border-white border-8">
+                <div className="w-40 h-40 rounded-full flex items-center justify-center absolute top-24 inset-0 mx-auto border-solid border-white border-8" style={{ backgroundColor: game.color }}>
                     <img className='w-20'
                         src={game.icon}
                         alt="User Profile"
