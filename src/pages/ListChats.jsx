@@ -6,7 +6,10 @@ import { TopBar } from '../components/Navigation';
 const ListChats = () => {
     const [users, setUsers] = useState([]);
     const [chatMessages, setChatMessages] = useState({});
-    const currentUserId = localStorage.getItem('userId')
+    let currentUserId = localStorage.getItem('userId')
+    if (!currentUserId) {
+        currentUserId = sessionStorage.getItem('userId')
+      }
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -23,10 +26,7 @@ const ListChats = () => {
 
     return (
         <div className="max-w-md mx-auto bg-white shadow-lg">
-            <div className='px-4'>
                 <TopBar title={'Chats'} backBtn />
-            </div>
-
             {users.length === 0 ? (
                 <div className="px-4 py-6 text-center">
                     <p className="text-lg text-gray-600">No tienes matchs</p>

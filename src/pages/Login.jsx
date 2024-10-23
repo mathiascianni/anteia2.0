@@ -10,6 +10,7 @@ import { TopBar } from '../components/Navigation';
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [keepLoggedIn, setKeepLoggedIn] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -22,6 +23,10 @@ const Login = () => {
         setPassword(e.target.value);
     };
 
+    const handleKeepLoggedInChange = (e) => {
+        setKeepLoggedIn(e.target.checked);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!email || !password) {
@@ -32,14 +37,25 @@ const Login = () => {
             setLoading(true);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const userId = userCredential.user.uid;
-            localStorage.setItem('userId', userId);
+
+            if (keepLoggedIn) {
+                localStorage.setItem('userId', userId);
+            } else {
+                sessionStorage.setItem('userId', userId);
+            }
+
             await completeBadges(userId, 'Bienvenido');
             setError("");
             setEmail("");
             setPassword("");
             navigate("/");
         } catch (error) {
-            setError(error.message);
+
+            if (error.code === 'auth/invalid-credential') {
+                setError("La credenciales no coinciden.");
+            } else {
+                setError("Ocurrió un error. Por favor, inténtalo nuevamente.");
+            }
         } finally {
             setLoading(false);
         }
@@ -56,7 +72,13 @@ const Login = () => {
                     </div>
                     {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
                     <p className='text-primary text-sm mb-4'>¿Olvidaste tu contraseña?</p>
-                    <Checkbox text="Mantener sesión iniciada" />
+
+                    <Checkbox
+                        text="Mantener sesión iniciada"
+                        checked={keepLoggedIn}
+                        onChange={handleKeepLoggedInChange}
+                    />
+
                     <div>
                         <button
                             type="submit"
@@ -73,6 +95,6 @@ const Login = () => {
             </div>
         </div>
     );
-}
+};
 
 export default Login;

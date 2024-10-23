@@ -12,11 +12,9 @@ const MyProfile = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const userId = localStorage.getItem('userId');
+			let userId = localStorage.getItem('userId');
 			if (!userId) {
-				console.error('No se encontró el ID del usuario en localStorage.');
-				setLoading(false);
-				return;
+				userId = sessionStorage.getItem('userId')
 			}
 			const userData = await getUserById(userId);
 			const badgesData = await getDataDB('badges');
@@ -34,9 +32,7 @@ const MyProfile = () => {
 	console.log(data)
 	return (
 		<div>
-			<div className='px-4'>
-				<TopBar backBtn bell />
-			</div>
+			<TopBar backBtn bell />
 			<ProfileHeader user={data} edit />
 			{data.role === 'admin' &&
 				<div className="px-4 pt-4">

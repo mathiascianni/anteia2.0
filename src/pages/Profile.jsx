@@ -109,7 +109,7 @@ const Profile = () => {
           const message = `te comenzo a seguir`
           await sendNotification(message, currentUser.uid, user.id, 'follow')
           setIsFollowing(2);
-        } else if(connectionExists === 5){
+        } else if (connectionExists === 5) {
           await changeFollowStatusTrue(currentUser.uid, user.id);
           setIsFollowing(2);
         }
@@ -137,11 +137,8 @@ const Profile = () => {
   }
   return (
     <div key={user.uid}>
-      <div className='px-4'>
-        <TopBar backBtn bell />
-      </div>
+      <TopBar backBtn bell />
       <ProfileHeader user={user} like />
-      {console.log(isFollowing)}
       <div className='px-4 my-4'>
         {isFollowing === 1 ?
           <div className='grid grid-cols-3 gap-2'>

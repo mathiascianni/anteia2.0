@@ -26,11 +26,11 @@
 @keyframes fadeDown {
     from {
         opacity: 0;
-        transform: translateY(-20px); /* Mueve hacia arriba */
+        transform: translateY(-20px); 
     }
     to {
         opacity: 1;
-        transform: translateY(0); /* Regresa a la posición original */
+        transform: translateY(0);
     }
 }
 
@@ -40,11 +40,24 @@
   
 @keyframes fadeUp {
     from {
-        opacity: 1; /* Comienza visible */
-        transform: translateY(20px); /* Mueve hacia abajo */
+        opacity: 1; 
+        transform: translateY(20px); 
     }
     to {
-        opacity: 0; /* Termina invisible */
-        transform: translateY(0); /* Regresa a la posición original */
+        opacity: 0; 
+        transform: translateY(0); 
     }
+}
+
+.bg-image {
+    background-image: url('../public/assets/home/bannerHome.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: blur(6px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0; 
 }

@@ -5,6 +5,8 @@ import { firestore, getDataDB, storage } from '../../credentials';
 import Select from '../Auth/Select';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from 'react-router-dom';
+import { TopBar } from '../Navigation';
 
 const FormAddGame = () => {
   const [step, setStep] = useState(1);
@@ -16,7 +18,7 @@ const FormAddGame = () => {
   const [clasificaciones, setClasificaciones] = useState([]);
   const [iconoFile, setIconoFile] = useState(null);
   const [bannerFile, setBannerFile] = useState(null);
-
+  const navigate = useNavigate()
   useEffect(() => {
     const obtenerData = async () => {
       try {
@@ -48,6 +50,8 @@ const FormAddGame = () => {
       console.error('Icono y banner son obligatorios.');
       return;
     }
+
+    navigate('/admin')
 
     try {
       const iconoStorageRef = ref(storage, `games/${title}/icon.png`);
@@ -121,6 +125,7 @@ const FormAddGame = () => {
   console.log(step);
   return (
     <div>
+      <TopBar backBtn />
       <div className="flex justify-center my-8">
         {Array.from({ length: 4 }, (_, index) => (
           <div
