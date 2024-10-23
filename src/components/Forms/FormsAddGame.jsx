@@ -51,8 +51,6 @@ const FormAddGame = () => {
       return;
     }
 
-    navigate('/admin')
-
     try {
       const iconoStorageRef = ref(storage, `games/${title}/icon.png`);
       const bannerStorageRef = ref(storage, `games/${title}/banner.png`);
@@ -78,6 +76,7 @@ const FormAddGame = () => {
       };
 
       await setDoc(doc(firestore, 'games', gameData.uid), gameData);
+      navigate('/admin')
       console.log('Datos enviados correctamente a Firestore:', gameData);
     } catch (error) {
       console.error('Error al enviar datos a Firestore:', error);

@@ -29,49 +29,62 @@ const useRegister = () => {
     };
 
     const handleProfileImageChange = async (image) => {
-        if (image && image.startsWith('data:')) {
-            try {
-                const profileDownloadURL = await uploadImageToStorage(image, username, `profile_${username}.png`);
-                setProfileImageURL(profileDownloadURL);
-            } catch (error) {
-                console.error("Error al subir la imagen de perfil:", error);
-            }
-        }
+       setProfileImageURL(image)
     };
 
     const handleBannerImageChange = async (image) => {
-        if (image && image.startsWith('data:')) {
-            try {
-                const bannerDownloadURL = await uploadImageToStorage(image, username, `banner_${username}.png`);
-                setBannerImageURL(bannerDownloadURL);
-            } catch (error) {
-                console.error("Error al subir la imagen del banner:", error);
-            }
-        }
+        setBannerImageURL(image)
     };
 
     const handleConfirmPasswordChange = (e) => {
         setConfirmPassword(e.target.value);
     };
 
+    const validateStep = (step) => {
+        if (step === 1) {
+            if (!username || !email) {
+                setError("El nombre de usuario y el email son obligatorios.");
+                return false;
+            }
+            setError("");
+        }
+
+        if (step === 2) {
+            if (!password || !confirmPassword) {
+                setError("La contraseña y la confirmación son obligatorias.");
+                return false;
+            }
+
+            const passwordValidation = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            if (!passwordValidation.test(password)) {
+                setError("La contraseña debe tener al menos 8 caracteres, incluyendo letras y números.");
+                return false;
+            }
+
+            if (password !== confirmPassword) {
+                setError("Las contraseñas no coinciden.");
+                return false;
+            }
+            setError("");
+        }
+
+        if (step === 3 && !profileImageURL) {
+            setError("Debes seleccionar un avatar.");
+            return false;
+        }
+
+        if (step === 4 && !bannerImageURL) {
+            setError("Debes seleccionar un banner.");
+            return false;
+        }
+
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!username || !email || !password || !confirmPassword) {
-            setError("Todos los campos son obligatorios.");
-            return;
-        }
-
-
-        const passwordValidation = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-        if (!passwordValidation.test(password)) {
-            setError("La contraseña debe tener al menos 8 caracteres, incluyendo letras y números.");
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setError("Las contraseñas no coinciden.");
-            return;
-        }
+        // Validar último paso
+        if (!validateStep(4)) return;
 
         try {
             setLoading(true);
@@ -123,7 +136,8 @@ const useRegister = () => {
         handleProfileImageChange,
         handleBannerImageChange,
         handleConfirmPasswordChange,
-        handleSubmit
+        handleSubmit,
+        validateStep, 
     };
 };
 

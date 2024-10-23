@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Input from '../components/Auth/Input';
 import Checkbox from '../components/Auth/Checkbox';
 import { TopBar } from '../components/Navigation';
 import useRegister from '../hooks/useRegister';
 import { useNavigate } from 'react-router-dom';
+import { getUrlsStorage } from '../credentials';
 
 const Register = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [avatars, setAvatars] = useState([]);
+  const [banners, setBanners] = useState([]);
+  const [selectedAvatar, setSelectedAvatar] = useState('');
+  const [selectedBanner, setSelectedBanner] = useState('');
 
   const {
     username,
@@ -25,34 +30,33 @@ const Register = () => {
     handleBannerImageChange,
     handleConfirmPasswordChange,
     handleSubmit,
+    validateStep, 
   } = useRegister();
-  console.log(step)
+
+  const handleAvatarSelect = (url) => {
+    setSelectedAvatar(url);
+    handleProfileImageChange(url);
+  }
+
+  const handleBannerSelect = (url) => {
+    setSelectedBanner(url);
+    handleBannerImageChange(url);
+  }
+
+  useEffect(() => {
+    const fetchUrls = async () => {
+      const avatarsUrl = await getUrlsStorage('avatars');
+      const bannersUrl = await getUrlsStorage('banners');
+      setAvatars(avatarsUrl);
+      setBanners(bannersUrl);
+    }
+    fetchUrls();
+  }, []);
+
   const handleNext = (e) => {
     e.preventDefault();
-    console.log('Step before increment:', step);
-    setStep(step + 1);
-    console.log('Step after increment:', step + 1);
-  };
-
-  const handleProfileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleProfileImageChange(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleBannerUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleBannerImageChange(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (validateStep(step)) {
+      setStep(step + 1);
     }
   };
 
@@ -100,37 +104,35 @@ const Register = () => {
       case 3:
         return (
           <>
-            <label>
-              <p>Profile:</p>
-              <input
-                className='hidden'
-                type="file"
-                id="profile"
-                name="profile"
-                onChange={handleProfileUpload}
-              />
-              <div className='grid grid-cols-6'>
-                {profileImageURL ? (
-                  <img className='w-20 mx-auto my-auto rounded-full col-span-2' src={profileImageURL} alt="Profile" />
-                ) : (
-                  <img className='w-20 mx-auto my-auto rounded-full col-span-2' src='./assets/user/avatar.png' alt="Profile" />
-                )}
-                <div htmlFor="profile" className='w-full h-24 rounded-md bg-medium col-span-4 flex justify-center items-center'>
-                  <p className='text-gray-300 border-dotted border-2 border-light py-6 px-9'>tap para cambiar</p>
+            <p className='mb-4'>Selecciona tu Avatar:</p>
+            <div className='grid grid-cols-3 gap-4'>
+              {avatars.map((avatar) => (
+                <div
+                  key={avatar}
+                  onClick={() => handleAvatarSelect(avatar)}
+                  className={`hover:border-4 border-primary cursor-pointer rounded-full ${selectedAvatar === avatar ? 'border-4 border-primary' : ''}`}
+                >
+                  <img className='w-full' src={avatar} alt="Avatar" />
                 </div>
-              </div>
-            </label>
-            <label>
-              <p>Banner:</p>
-              <input
-                type="file"
-                id='banner'
-                name='banner'
-                className='hidden'
-                onChange={handleBannerUpload}
-              />
-              {bannerImageURL && <img className='rounded-md' src={bannerImageURL} alt="Banner" />}
-            </label>
+              ))}
+            </div>
+          </>
+        );
+      case 4:
+        return (
+          <>
+            <p className='mb-4'>Selecciona tu Banner:</p>
+            <div className='grid grid-cols-1 gap-4'>
+              {banners.map((banner) => (
+                <div
+                  key={banner}
+                  onClick={() => handleBannerSelect(banner)}
+                  className={`hover:border-4 border-primary cursor-pointer ${selectedBanner === banner ? 'border-4 border-primary' : ''}`}
+                >
+                  <img className='w-full' src={banner} alt="Banner" />
+                </div>
+              ))}
+            </div>
           </>
         );
       default:
@@ -146,7 +148,7 @@ const Register = () => {
         <h2 className="font-bold text-2xl my-3">Paso {step}</h2>
         <form className="space-y-4">
           {renderInputs()}
-          {error && <p className="text-red-500 text-sm text-start mt-5 ">{error}</p>}
+          {error && <p className="text-red-500 text-sm text-start mt-5">{error}</p>}
           <div className='flex flex-col'>
             {step !== 1 && (
               <button
@@ -159,15 +161,13 @@ const Register = () => {
             )}
             <button
               type="button"
-              onClick={step === 3 ? handleSubmit : handleNext}
+              onClick={step === 4 ? handleSubmit : handleNext}
               className="text-white bg-primary w-full py-5 rounded-lg mb-8"
             >
-              {step === 3 ? 'Crear cuenta' : 'Continuar'}
+              {step === 4 ? 'Crear cuenta' : 'Continuar'}
             </button>
           </div>
-
         </form>
-
       </div>
 
       <div className="w-full flex flex-col">

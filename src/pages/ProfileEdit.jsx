@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { auth, completeBadges, getUserById, storage, updateAuthUserProfile, updateUserProfile, uploadImage } from '../credentials';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { auth, completeBadges, getUrlsStorage, getUserById, updateAuthUserProfile, updateUserProfile, uploadImage } from '../credentials';
 import Input from '../components/Auth/Input';
 import Button from '../components/Auth/Button';
 import { SpinnerLoader } from '../components/General';
-import Checkbox from '../components/Auth/Checkbox';
 import { useNavigate } from 'react-router-dom';
 
 const ProfileEdit = () => {
     const [authUser, setAuthUser] = useState(null);
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const [banner, setBanner] = useState('');
-    const [profileImage, setProfileImage] = useState(null);
+    const [avatars, setAvatars] = useState([]);
+    const [banners, setBanners] = useState([]);
+    const [selectedAvatar, setSelectedAvatar] = useState('');
+    const [selectedBanner, setSelectedBanner] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -26,34 +26,35 @@ const ProfileEdit = () => {
                 .then(user => {
                     setUsername(user.displayName);
                     setEmail(user.email);
-                    setBanner(user.banner);
-                    setProfileImage(user.photoURL);
+                    setSelectedBanner(user.banner);
+                    setSelectedAvatar(user.photoURL);
                 })
                 .catch(error => console.error('Error fetching user data:', error));
         }
     }, [authUser]);
 
-    const handleInputChange = (setter) => (e) => setter(e.target.value);
-
-    const handleFileChange = (setter) => (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onloadend = () => setter(reader.result);
-        if (file) reader.readAsDataURL(file);
-    };
+    useEffect(() => {
+        const fetchUrls = async () => {
+            const avatarsUrl = await getUrlsStorage('avatars');
+            const bannersUrl = await getUrlsStorage('banners');
+            setAvatars(avatarsUrl);
+            setBanners(bannersUrl);
+        };
+        fetchUrls();
+    }, []);
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         try {
-            let profileDownloadURL = profileImage;
-            let bannerDownloadURL = banner;
+            let profileDownloadURL = selectedAvatar;
+            let bannerDownloadURL = selectedBanner;
 
-            if (profileImage && profileImage.startsWith('data:')) {
-                profileDownloadURL = await uploadImage(profileImage, 'profile.png');
+            if (selectedAvatar.startsWith('data:')) {
+                profileDownloadURL = await uploadImage(selectedAvatar, 'profile.png');
             }
 
-            if (banner && banner.startsWith('data:')) {
-                bannerDownloadURL = await uploadImage(banner, 'banner.png');
+            if (selectedBanner.startsWith('data:')) {
+                bannerDownloadURL = await uploadImage(selectedBanner, 'banner.png');
             }
 
             await updateUserProfile(authUser.uid, {
@@ -65,7 +66,7 @@ const ProfileEdit = () => {
 
             await updateAuthUserProfile(username, profileDownloadURL, email);
             await completeBadges(authUser.uid, 'Primer Cambio');
-            return navigate('/profile')
+            return navigate('/profile');
         } catch (error) {
             console.error('Error updating profile:', error);
         }
@@ -73,28 +74,41 @@ const ProfileEdit = () => {
 
     return (
         <div className='container mx-auto px-4'>
-
             {authUser ? (
                 <>
                     <h1 className='text-3xl font-bold text-center mt-4'>Profile Edit</h1>
                     <form className='flex flex-col space-y-4 my-8' onSubmit={handleUpdateProfile}>
-                        <Input title="Username" type="text" value={username} onChange={handleInputChange(setUsername)} required />
-                        <Input title="Email" type="email" value={email} onChange={handleInputChange(setEmail)} />
-                        <label>
-                            <p>Profile:</p>
-                            <input className='hidden' type="file" id="profile" name="profile" onChange={handleFileChange(setProfileImage)} />
-                            <div className='grid grid-cols-6'>
-                                {profileImage && <img className='w-20 mx-auto my-auto rounded-full col-span-2' src={profileImage} alt="Profile" />}
-                                <div htmlFor="profile" className='w-full h-24 rounded-md bg-medium col-span-4 flex justify-center items-center'>
-                                    <p className='text-gray-300 border-dotted border-2 border-light py-6 px-9'>tap para cambiar</p>
+                        <Input title="Username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                        <Input title="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+
+                      
+                        <p>Selecciona tu Avatar:</p>
+                        <div className='grid grid-cols-3 gap-4'>
+                            {avatars.map((avatar) => (
+                                <div
+                                    key={avatar}
+                                    onClick={() => setSelectedAvatar(avatar)}
+                                    className={`cursor-pointer rounded-full ${selectedAvatar === avatar ? 'border-4 border-primary' : ''}`}
+                                >
+                                    <img className='w-full rounded-full' src={avatar} alt="Avatar" />
                                 </div>
-                            </div>
-                        </label>
-                        <label>
-                            <p>Banner:</p>
-                            <input type="file" id='banner' name='banner' className='hidden' onChange={handleFileChange(setBanner)} />
-                            {banner && <img className='rounded-md' htmlFor="banner" src={banner} alt="Banner" />}
-                        </label>
+                            ))}
+                        </div>
+
+                
+                        <p>Selecciona tu Banner:</p>
+                        <div className='grid grid-cols-2 gap-2'>
+                            {banners.map((banner) => (
+                                <div
+                                    key={banner}
+                                    onClick={() => setSelectedBanner(banner)}
+                                    className={`cursor-pointer rounded-md ${selectedBanner === banner ? 'border-4 border-primary' : ''}`}
+                                >
+                                    <img className='w-full rounded-md' src={banner} alt="Banner" />
+                                </div>
+                            ))}
+                        </div>
+
                         <Button text="Update Profile" handleSubmit={handleUpdateProfile} />
                     </form>
                 </>

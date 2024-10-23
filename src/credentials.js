@@ -3,7 +3,7 @@ import { getAnalytics } from "firebase/analytics";
 import { getAuth, updateEmail, updateProfile } from "firebase/auth";
 import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion, addDoc, orderBy, limit, arrayRemove } from 'firebase/firestore';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL, uploadString } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL, uploadString, listAll } from 'firebase/storage';
 import { getDatabase, update } from "firebase/database";
 import { getDocs, where } from 'firebase/firestore';
 
@@ -175,6 +175,27 @@ export const uploadImageToStorage = async (imageData, displaName, fileName) => {
   return await getDownloadURL(storageRef);
 };
 
+export const getUrlsStorage = async (carpeta) => {
+  try {
+      const storage = getStorage();
+      const folderRef = ref(storage, carpeta);
+
+      const archivos = await listAll(folderRef);
+      const urls = await Promise.all(
+          archivos.items.map(async (itemRef) => {
+              
+              const url = await getDownloadURL(itemRef);
+              return url;
+          })
+      );
+
+      return urls;
+  } catch (error) {
+      console.error("Error al obtener URLs de la carpeta:", error);
+      return [];
+  }
+};
+
 export const uploadImage = async (image, path) => {
   const currentUser = auth.currentUser
   const blob = await fetch(image).then(res => res.blob());
@@ -184,7 +205,7 @@ export const uploadImage = async (image, path) => {
 };
 
 // Actualiza el perfil del usuario en Firebase Authentication
-export const updateAuthUserProfile = async (displayName, photoURL, email) => {
+export const updateAuthUserProfile = async (displayName, photoURL) => {
   const auth = getAuth();
   console.log(auth.currentUser);
   try {
@@ -192,7 +213,6 @@ export const updateAuthUserProfile = async (displayName, photoURL, email) => {
       displayName,
       photoURL,
     });
-    //await updateEmail(auth.currentUser, email);  hay que verificar el email 
     console.log('Perfil de usuario actualizado exitosamente en Firebase Authentication!');
   } catch (error) {
     throw new Error('Error al actualizar el perfil de usuario en Firebase Authentication:', error);
