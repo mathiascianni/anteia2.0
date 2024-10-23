@@ -2,7 +2,7 @@ import React from 'react';
 
 const Banner = () => {
     return (
-        <div className='relative my-8'>
+        <div className='relative mb-12'>
             <div className='bg-image'></div>
             <div className='p-4 text-white space-y-4 flex flex-col relative z-10 border-y-4 border-white'>
                 <h2 className='text-2xl'>Explorá al <span className='font-bold'>máximo</span> a tus próximos <span className='font-bold'>compañeros</span></h2>

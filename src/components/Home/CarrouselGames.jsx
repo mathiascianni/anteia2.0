@@ -17,8 +17,8 @@ const CarrouselGames = () => {
     }, []);
 
     return (
-        <div className='px-4'>
-            <h2 className='font-bold text-lg mb-2'>Carrousel de juegos</h2>
+        <div className='px-4 mb-12'>
+            <h2 className='font-bold text-xl mb-2'>Carrousel de juegos</h2>
             <Swiper
                 spaceBetween={20} 
                 slidesPerView={4}
