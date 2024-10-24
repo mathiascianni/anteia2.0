@@ -65,9 +65,9 @@ const Login = () => {
         <div className='px-4 pb-8 flex flex-col justify-between min-h-screen'>
             <TopBar title="Iniciar sesión" />
             <div className='flex-1'>
-                <form onSubmit={handleSubmit}>
-                    <div className='mt-5 gap-6 flex flex-col mx-auto mb-4'>
-                        <Input title="Email" type="email" value={email} onChange={handleEmailChange} />
+                <form onSubmit={handleSubmit} className='flex flex-col'>
+                    <div className='mt-5 gap-6 flex flex-col mb-4'>
+                        <Input title="Email" type="email" value={email} onChange={handleEmailChange} classInput='w-full' />
                         <Input title="Contraseña" type="password" value={password} onChange={handlePasswordChange} />
                     </div>
                     {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -79,10 +79,10 @@ const Login = () => {
                         onChange={handleKeepLoggedInChange}
                     />
 
-                    <div>
+                    <div className=' fixed bottom-4 left-4 right-4'>
                         <button
                             type="submit"
-                            className="text-white bg-primary py-5 rounded-lg mb-8 w-full"
+                            className="text-white bg-primary py-5 rounded-lg mb-4 w-full"
                             disabled={loading}
                         >
                             Iniciar sesión

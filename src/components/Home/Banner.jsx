@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Banner = () => {
     return (
@@ -13,7 +14,7 @@ const Banner = () => {
                     <li>Juega y diviértete</li>
                 </ul>
                 <div className='flex justify-end'>
-                    <button className='bg-primary rounded-lg text-sm font-bold !mt-12 px-8 py-4'>¡Matchea ahora!</button>
+                    <Link to={'/matchs'} className='bg-primary rounded-lg text-sm font-bold !mt-12 px-8 py-4'>¡Matchea ahora!</Link>
                 </div>
             </div>
         </div>

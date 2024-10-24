@@ -59,7 +59,7 @@ const TopBar = ({ backBtn, title, bell, icon }) => {
     }, [notifications]);
 
     return (
-        <div className="px-4">
+        <div className="px-4 sticky top-0 left-0 right-0 bg-white z-30">
             <div className='h-menu flex items-center justify-between relative'>
                 {backBtn && (
                     <button
