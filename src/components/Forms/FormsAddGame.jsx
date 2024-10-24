@@ -17,7 +17,9 @@ const FormAddGame = () => {
   const [clasificacion, setClasificacion] = useState('');
   const [clasificaciones, setClasificaciones] = useState([]);
   const [iconoFile, setIconoFile] = useState(null);
+  const [iconoPreview, setIconoPreview] = useState('');
   const [bannerFile, setBannerFile] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState('');
   const navigate = useNavigate()
   useEffect(() => {
     const obtenerData = async () => {
@@ -38,6 +40,30 @@ const FormAddGame = () => {
     setStep(step + 1);
   };
 
+  const handleIconoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setIconoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setIconoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBannerChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setBannerFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBannerPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handlePrevious = (e) => {
     e.preventDefault();
     setStep(step - 1);
@@ -53,7 +79,7 @@ const FormAddGame = () => {
 
     try {
       const iconoStorageRef = ref(storage, `games/${title}/icon.png`);
-      const bannerStorageRef = ref(storage, `games/${title}/banner.png`);
+      const bannerStorageRef = ref(storage, `banners/banner${title}.png`);
 
       const iconoSnapshot = await uploadBytes(iconoStorageRef, iconoFile, {
         contentType: 'image/png',
@@ -89,20 +115,67 @@ const FormAddGame = () => {
         return (
           <>
             <Input title="Título" type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-            <Input title="Color" type="color" value={color} onChange={(e) => setColor(e.target.value)} required />
+            <Input title="Color" type="color" value={color} onChange={(e) => setColor(e.target.value)} classInput={'!h-32'} required />
             <Select title="Género" options={generos} value={genero} onChange={(e) => setGenero(e.target.value)} required />
           </>
         );
       case 2:
         return (
           <>
-            <input type="file" id="icon" name="icon" onChange={(e) => setIconoFile(e.target.files[0])} />
-            <div htmlFor="icon" className='w-full h-24 rounded-md bg-medium col-span-4 flex justify-center items-center'>
-              <p className='text-gray-300 border-dotted border-2 border-light py-6 px-9'>tap para cambiar</p>
+            <input className='hidden' type="file" id="icon" name="icon" onChange={handleIconoChange} />
+            <h2>Icono:</h2>
+            <div className='grid grid-cols-6'>
+              <div className='col-span-2'>
+                {
+                  iconoPreview ? (
+                    <div
+                      className='w-24 h-24 rounded-full p-4 flex justify-center items-center'
+                      style={{ backgroundColor: color }}
+                    >
+                      <img className='w-full' src={iconoPreview} alt="Icon" />
+                    </div>
+                  ) : (
+                    <div className='w-24 h-24 rounded-full bg-gray-200'></div>
+                  )
+                }
+              </div>
+
+              <div className='col-span-4'>
+                <label
+                  htmlFor="icon"
+                  className=' h-24 rounded-md bg-medium flex justify-center items-center cursor-pointer'
+                >
+                  <p className='text-gray-300 border-dotted border-2 border-light py-6 px-9'>tap para agregar</p>
+                </label>
+              </div>
+
             </div>
-            <input type="file" id="bannerInput" onChange={(e) => setBannerFile(e.target.files[0])} />
+            <input className='hidden' type="file" id="banner" name="banner" onChange={handleBannerChange} />
+            <h2>Banner:</h2>
+            <div>
+              <div>
+                {
+                  bannerPreview ? (
+                    <label
+                      htmlFor="banner"
+                    >
+                      <img className='w-full rounded-md bg-medium flex justify-center items-center cursor-pointer' src={bannerPreview} alt="" />
+                    </label>
+                  ) : (
+                    <label
+                      htmlFor="banner"
+                      className='h-32 rounded-md bg-medium flex justify-center items-center cursor-pointer'
+                    >
+                      <p className='text-gray-300 py-10 px-10'>tap para agregar</p>
+                    </label>
+                  )
+                }
+
+              </div>
+            </div>
           </>
         );
+
       case 3:
         return (
           <div className="grid grid-cols-3 gap-4">
@@ -125,7 +198,7 @@ const FormAddGame = () => {
   return (
     <div>
       <TopBar backBtn />
-      <div className="flex justify-center my-8">
+      {/* <div className="flex justify-center my-8">
         {Array.from({ length: 4 }, (_, index) => (
           <div
             key={index}
@@ -137,14 +210,14 @@ const FormAddGame = () => {
             )}
           </div>
         ))}
-      </div>
+      </div> */}
 
       {step !== 4 && (
         <div className="container px-4">
           <h2 className="font-bold text-2xl my-3">Paso {step}: {step === 1 ? 'Datos del juego' : step === 2 ? 'Ícono y Banner' : 'Clasificación'}</h2>
           <form className="space-y-4" onSubmit={step === 4 ? handleSubmit : handleNext}>
             {renderInputs()}
-            <div className="w-full fixed bottom-[120px] right-0 left-0 text-center">
+            <div className="w-full right-0 left-0 text-center">
               {step !== 1 && (
                 <button
                   type="button"
@@ -169,10 +242,61 @@ const FormAddGame = () => {
           <h2 className="font-bold text-2xl my-3">Resumen</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <Input title="Título" type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-            <Input title="Color" type="color" value={color} onChange={(e) => setColor(e.target.value)} required />
+            <Input title="Color" type="color" value={color} onChange={(e) => setColor(e.target.value)} classInput={'!h-32'} required />
             <Select title="Género" options={generos} value={genero} onChange={(e) => setGenero(e.target.value)} required />
-            <input type="file" id="iconoInput" onChange={(e) => setIconoFile(e.target.files[0])} />
-            <input type="file" id="bannerInput" onChange={(e) => setBannerFile(e.target.files[0])} />
+            <>
+              <input className='hidden' type="file" id="icon" name="icon" onChange={handleIconoChange} />
+              <h2>Icono:</h2>
+              <div className='grid grid-cols-6'>
+                <div className='col-span-2'>
+                  {
+                    iconoPreview ? (
+                      <div
+                        className='w-24 h-24 rounded-full p-4 flex justify-center items-center'
+                        style={{ backgroundColor: color }}
+                      >
+                        <img className='w-full' src={iconoPreview} alt="Icon" />
+                      </div>
+                    ) : (
+                      <div className='w-24 h-24 rounded-full bg-gray-200'></div>
+                    )
+                  }
+                </div>
+
+                <div className='col-span-4'>
+                  <label
+                    htmlFor="icon"
+                    className=' h-24 rounded-md bg-medium flex justify-center items-center cursor-pointer'
+                  >
+                    <p className='text-gray-300 border-dotted border-2 border-light py-6 px-9'>tap para agregar</p>
+                  </label>
+                </div>
+
+              </div>
+              <input className='hidden' type="file" id="banner" name="banner" onChange={handleBannerChange} />
+              <h2>Banner:</h2>
+              <div>
+                <div>
+                  {
+                    bannerPreview ? (
+                      <label
+                        htmlFor="banner"
+                      >
+                        <img className='w-full rounded-md bg-medium flex justify-center items-center cursor-pointer' src={bannerPreview} alt="" />
+                      </label>
+                    ) : (
+                      <label
+                        htmlFor="banner"
+                        className='h-32 rounded-md bg-medium flex justify-center items-center cursor-pointer'
+                      >
+                        <p className='text-gray-300 py-10 px-10'>tap para agregar</p>
+                      </label>
+                    )
+                  }
+
+                </div>
+              </div>
+            </>
             <div className="grid grid-cols-3 gap-4">
               {clasificaciones.map((clasificacionItem) => (
                 <img

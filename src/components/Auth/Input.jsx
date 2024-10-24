@@ -1,8 +1,8 @@
 import React from 'react';
 
-const Input = ({title = "", type = "", value, onChange}) => {
+const Input = ({title = "", type = "", value, onChange, classInput = ''}) => {
     return (
-        <div className="relative w-full h-10">
+        <div className={`relative w-full h-10 ${classInput}`}>
             <input
                 type={type}
                 value={value}
