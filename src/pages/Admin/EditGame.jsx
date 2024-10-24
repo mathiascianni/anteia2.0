@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getDoc, doc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { firestore, getDataDB, storage } from '../../credentials';
@@ -10,6 +10,7 @@ import { SpinnerLoader } from '../../components/General';
 
 const EditGame = () => {
   const { uid } = useParams();
+  const navigate = useNavigate()
   const [game, setGame] = useState(null);
   const [generos, setGenres] = useState([]);
   const [formData, setFormData] = useState({
@@ -88,7 +89,7 @@ const EditGame = () => {
     if (file) reader.readAsDataURL(file);
   };
 
-  const handleSaveClick = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       let iconDownloadURL = formData.icon;
@@ -96,17 +97,17 @@ const EditGame = () => {
 
       const uploadImage = async (image, path) => {
         const blob = await fetch(image).then(res => res.blob());
-        const storageRef = ref(storage, `games/${uid}/${path}`);
+        const storageRef = ref(storage, `${path}`);
         const snapshot = await uploadBytes(storageRef, blob, { contentType: 'image/png' });
         return await getDownloadURL(snapshot.ref);
       };
 
       if (formData.icon && formData.icon.startsWith('data:')) {
-        iconDownloadURL = await uploadImage(formData.icon, 'icon.png');
+        iconDownloadURL = await uploadImage(formData.icon, `games/${title}/icon.png`);
       }
 
       if (formData.banner && formData.banner.startsWith('data:')) {
-        bannerDownloadURL = await uploadImage(formData.banner, 'banner.png');
+        bannerDownloadURL = await uploadImage(formData.banner, 'banners/banner${title}.png');
       }
 
       await updateDoc(doc(firestore, 'games', game.id), {
@@ -114,7 +115,7 @@ const EditGame = () => {
         icon: iconDownloadURL,
         banner: bannerDownloadURL,
       });
-
+      navigate('/admin')
       console.log('Juego actualizado correctamente.');
     } catch (error) {
       console.error('Error al actualizar juego:', error);
@@ -126,7 +127,7 @@ const EditGame = () => {
       {game ? (
         <>
           <h1 className="text-3xl font-bold text-center mt-4">Editar juego</h1>
-          <form className="flex flex-col space-y-4 my-8" onSubmit={handleSaveClick}>
+          <form className="flex flex-col space-y-4 my-8" onSubmit={handleSubmit}>
             <Input title="Título" type="text" name="title" value={formData.title} onChange={handleChangetitle} required />
             <Input title="Color" type="color" name="color" value={formData.color} onChange={handleChangeColor} required />
             <Select title='Género' options={generos} value={formData.genero} onChange={handleChangeGenero} required />
@@ -167,7 +168,7 @@ const EditGame = () => {
               <p>Clasificación:</p>
               <img src={formData.clasificacion} alt="" />
             </label>
-            <Button text="Guardar cambios" handleSubmit={handleSaveClick} />
+            <Button text="Guardar cambios" handleSubmit={handleSubmit} />
           </form>
         </>
       ) : (

@@ -30,7 +30,7 @@ const Register = () => {
     handleBannerImageChange,
     handleConfirmPasswordChange,
     handleSubmit,
-    validateStep, 
+    validateStep,
   } = useRegister();
 
   const handleAvatarSelect = (url) => {
@@ -149,7 +149,7 @@ const Register = () => {
         <form className="space-y-4">
           {renderInputs()}
           {error && <p className="text-red-500 text-sm text-start mt-5">{error}</p>}
-          <div className='flex flex-col'>
+          <div className='flex flex-col fixed bottom-4 left-4 right-4'>
             {step !== 1 && (
               <button
                 type="button"
@@ -162,18 +162,17 @@ const Register = () => {
             <button
               type="button"
               onClick={step === 4 ? handleSubmit : handleNext}
-              className="text-white bg-primary w-full py-5 rounded-lg mb-8"
+              className="text-white bg-primary w-full py-5 rounded-lg mb-4"
             >
               {step === 4 ? 'Crear cuenta' : 'Continuar'}
             </button>
+            <div className="w-full flex flex-col">
+              <p className='text-center'>
+                ¿Ya tienes una cuenta? <span onClick={() => navigate('/login')} className="text-primary font-bold">Inicia sesión</span>
+              </p>
+            </div>
           </div>
         </form>
-      </div>
-
-      <div className="w-full flex flex-col">
-        <p className='text-center'>
-          ¿Ya tienes una cuenta? <span onClick={() => navigate('/login')} className="text-primary font-bold">Inicia sesión</span>
-        </p>
       </div>
     </main>
   );
