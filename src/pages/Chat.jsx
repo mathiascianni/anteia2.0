@@ -4,6 +4,7 @@ import { firestore, auth, getUserById, sendNotification } from '../credentials';
 import { collection, addDoc, doc, getDoc, setDoc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getMessaging, onMessage } from "firebase/messaging";
+import { TopBar } from '../components/Navigation';
 
 const Chat = () => {
     const [messages, setMessages] = useState([]);
@@ -78,17 +79,8 @@ const Chat = () => {
         }
     };
     return (
-        <div className="mx-auto border border-gray-200 flex flex-col">
-            <div className="bg-primary text-white p-4">
-                {recipient ? (
-                    <Link to={`/profile/${recipient.id}`} className='flex items-center'>
-                        <img src={recipient.photoURL || 'https://via.placeholder.com/50'} alt={recipient.displayName} className="w-10 h-10 rounded-full mr-3" />
-                        <h2 className="text-xl font-semibold">{recipient.displayName || recipient.email}</h2>
-                    </Link>
-                ) : (
-                    <h2 className="text-xl font-semibold">Cargando...</h2>
-                )}
-            </div>
+        <div className="mx-auto border border-gray-200 flex flex-col h-screen">
+            <TopBar backBtn userChat={recipient}/>
             <div className="flex-grow overflow-y-auto p-4 bg-gray-100">
                 {messages.length > 0 ? messages.map((message) => (
                     <div key={message.id} className={`mb-4 ${message.sender !== userId ? 'text-right' : 'text-left'}`}>
@@ -109,7 +101,7 @@ const Chat = () => {
                 )) : <p className="text-center text-gray-500">No hay mensajes aún.</p>}
                 <div ref={messagesEndRef} />
             </div>
-            <div className="bg-gray-200 p-4">
+            <div className="bg-gray-200 p-4 sticky bottom-0">
                 <form onSubmit={sendMessage} className="flex">
                     <input
                         type="text"

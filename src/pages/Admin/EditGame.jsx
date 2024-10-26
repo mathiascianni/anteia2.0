@@ -107,7 +107,7 @@ const EditGame = () => {
       }
 
       if (formData.banner && formData.banner.startsWith('data:')) {
-        bannerDownloadURL = await uploadImage(formData.banner, 'banners/banner${title}.png');
+        bannerDownloadURL = await uploadImage(formData.banner, `banners/banner${formData.title}.png`);
       }
 
       await updateDoc(doc(firestore, 'games', game.id), {

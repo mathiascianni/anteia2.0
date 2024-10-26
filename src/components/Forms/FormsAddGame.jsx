@@ -95,6 +95,7 @@ const FormAddGame = () => {
         title,
         color,
         genero,
+        users: 0,
         icon: iconoDownloadURL,
         banner: bannerDownloadURL,
         clasificacion,
