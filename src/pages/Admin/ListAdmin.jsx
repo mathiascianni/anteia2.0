@@ -2,39 +2,39 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { deleteDataDB, getDataDB } from '../../credentials';
 
-const ListAdmin = ({table, addRoute, editRoute, title, secondTable}) => {
-    const [data, setData] = useState([]);
+const ListAdmin = ({ table, addRoute, editRoute, title, secondTable }) => {
+  const [data, setData] = useState([]);
 
-    useEffect(() => {
-      const obtenerData = async () => {
-        try {
-          const datos = await getDataDB(table);
-          setData(datos);
-        } catch (error) {
-          console.error('Error al obtener datos', error);
-        }
-      };
-      obtenerData();
-      return () => { };
-    }, []);
-  
-    const handleDelete = async (dataId) => {
+  useEffect(() => {
+    const obtenerData = async () => {
       try {
-        await deleteDataDB(`${table}/${dataId}`);
-        setData(data.filter((data) => data.id !== dataId));
+        const datos = await getDataDB(table);
+        setData(datos);
       } catch (error) {
-        console.error('Error al eliminar el Plan:', error);
+        console.error('Error al obtener datos', error);
       }
     };
-  
-    return (
+    obtenerData();
+    return () => { };
+  }, []);
+
+  const handleDelete = async (dataId) => {
+    try {
+      await deleteDataDB(`${table}/${dataId}`);
+      setData(data.filter((data) => data.id !== dataId));
+    } catch (error) {
+      console.error('Error al eliminar el Plan:', error);
+    }
+  };
+
+  return (
+    <div>
+      <h1 className='text-2xl font-bold my-2 '>Administrar {title}</h1>
+      <div className='text-xl mb-4'>Lista de {title}</div>
+      <div className='mb-6'>
+        <Link to={`/admin/${addRoute}`} className='bg-primary text-white px-4 py-2 text-xs rounded-md'>{title}</Link>
+      </div>
       <div className=''>
-        <h1 className='text-2xl font-bold my-2 '>Administrar {title}</h1>
-        <div className='text-xl mb-4'>Lista de {title}</div>
-        <div className='mb-6'>
-          <Link to={`/admin/${addRoute}`} className='bg-primary text-white px-4 py-2 text-xs rounded-md'>{title}</Link>
-        </div>
-        <div className=''>
         <table className='border-collapse w-full'>
           <thead className='w-full '>
             <tr>
@@ -49,7 +49,14 @@ const ListAdmin = ({table, addRoute, editRoute, title, secondTable}) => {
                 <td className='w-1/3 px-4'>
                   {data.title}
                 </td>
-                <td>{secondTable === 'Precio' ? data.price : '13k'}</td>
+                <td>
+                  {Array.isArray(data.users)
+                    ? data.users.length 
+                    : data.users && typeof data.users === 'object'
+                      ? Object.keys(data.users).length 
+                      : 0 
+                  }
+                </td>
                 <td className='flex justify-end'>
                   <Link to={`/admin/${editRoute}/${data.id}`}><button className='bg-primary text-white px-4 py-2 text-sm' >Editar</button></Link>
                   <button className='bg-error text-white px-4 py-2 text-sm' onClick={() => handleDelete(data.id)}>Borrar</button>
@@ -58,10 +65,10 @@ const ListAdmin = ({table, addRoute, editRoute, title, secondTable}) => {
             ))}
           </tbody>
         </table>
-        </div>
-        
       </div>
-    );
-  };
+
+    </div>
+  );
+};
 
 export default ListAdmin;

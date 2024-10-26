@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { auth, changeGameCondition, completeBadges, getDataDB, getUserById, checkFollowStatus, createChat, matchsUser, searchBadgeForName, sendNotification, changeFollowStatusTrue } from '../credentials';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { EditIcon } from '../Icons';
+import { EditIcon, Gear } from '../Icons';
 import UserCard from '../components/Home/UserCard';
 import { SpinnerLoader } from '../components/General';
 import { TopBar } from '../components/Navigation';
@@ -141,12 +141,14 @@ const Profile = () => {
       <ProfileHeader user={user} like />
       <div className='px-4 my-4'>
         {isFollowing === 1 ?
-          <div className='grid grid-cols-3 gap-2'>
-            <Link to={`/profile/${user.id}/configuration`} className='col-span-1'>
-              <Button text={'Conf'} />
-            </Link>
-            <Link to={`/chats/${user.id}`} className='col-span-2'>
+          <div className='grid grid-cols-8 gap-2'>
+            <Link to={`/chats/${user.id}`} className='col-span-6'>
               <Button text={'Mandar un mensaje'} handleSubmit={handleFollow} />
+            </Link>
+            <Link to={`/profile/${user.id}/configuration`} className='col-span-2'>
+              <div className='bg-primary rounded-lg h-full flex items-center justify-center'>
+                <Gear />
+              </div>
             </Link>
           </div>
           :

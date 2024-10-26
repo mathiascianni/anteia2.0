@@ -31,7 +31,7 @@ const MainRoutes = () => {
       <Route path="/profile" element={<IsAuth><MainLayout><MyProfile /></MainLayout></IsAuth>} />
       <Route path="/matchs" element={<IsAuth><MainLayout><SliderMatchs/></MainLayout></IsAuth>} />
       <Route path="/chats" element={<IsAuth><MainLayout><ListChats/></MainLayout></IsAuth>} />
-      <Route path="/chats/:userId" element={<IsMatch><IsAuth><MainLayout><Chat /></MainLayout></IsAuth></IsMatch>} />
+      <Route path="/chats/:userId" element={<IsMatch><IsAuth><Chat /></IsAuth></IsMatch>} />
       <Route path="/profile/edit" element={<IsAuth><MainLayout><ProfileEdit /></MainLayout></IsAuth>} />
       <Route path="/profile/:uid" element={<IsAuth><MainLayout><Profile /></MainLayout></IsAuth>} />
       <Route path="/profile/:uid/configuration" element={<IsAuth><MainLayout><ProfileConf /></MainLayout></IsAuth>} />

@@ -1,11 +1,11 @@
 import { BackBtn, Bell } from "../../Icons";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { auth, getUserById, firestore as firebaseFirestore } from "../../credentials";
 import { collection, orderBy, query, onSnapshot, doc } from "firebase/firestore";
 import Toast from "../Home/Toast";
 
-const TopBar = ({ backBtn, title, bell, icon }) => {
+const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,6 +68,18 @@ const TopBar = ({ backBtn, title, bell, icon }) => {
                     >
                         <BackBtn />
                     </button>
+                )}
+                {userChat && (
+                    <Link
+                        to={`/profile/${userChat.id}`}
+                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                    >
+                        <div className="bg-white rounded-full flex items-center justify-center">
+                            <img className="w-8 h-8 border-2 border-medium rounded-full" src={userChat.photoURL} alt={userChat.displayName} />
+                        </div>
+                        <div className="text-xs text-center">@{userChat.displayName}</div>
+                    </Link>
+
                 )}
                 {icon && (
                     <img

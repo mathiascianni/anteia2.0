@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { addDataArrayDB, auth, completeBadges, getGameById, getUserById, getUsersByGame } from '../credentials';
+import { addDataArrayDB, auth, completeBadges, firestore, getGameById, getUserById, getUsersByGame } from '../credentials';
 import { SpinnerLoader } from '../components/General';
 import UserCard from '../components/Home/UserCard';
 import { TopBar } from '../components/Navigation';
 import { ProfileHeader } from '../components/Profile';
+import { arrayUnion, doc, setDoc, updateDoc } from 'firebase/firestore';
 
 const Game = () => {
     const { uid } = useParams();
@@ -30,6 +31,10 @@ const Game = () => {
     const handleSubmit = async () => {
         if (!isGameAdded) {
             await addDataArrayDB(game, 'games');
+            const gameRef = doc(firestore, 'games', game.uid);
+            await updateDoc(gameRef, {
+                users: arrayUnion(userId)
+            });
             await completeBadges(userId, 'Juguemos');
             const updatedUserData = await getUserById(userId);
             const updatedUserGames = updatedUserData.games || [];
@@ -46,9 +51,9 @@ const Game = () => {
         : {};
     return (
         <div>
-           
-                <TopBar backBtn bell />
-            
+
+            <TopBar backBtn bell />
+
 
             <div
                 className={`border-b-2 text-white text-center pt-44 relative bg-cover bg-center bg-primary`}

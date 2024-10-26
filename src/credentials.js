@@ -520,6 +520,15 @@ export const getUserByToken = async (token) => {
   }
 };
 
+export const banUser = async (userId) => {
+  const userRef = doc(firestore, 'users', userId);
+  await updateDoc(userRef, {
+    ban: { status: true },
+  });
+
+  console.log('el usuario a sido baneado')
+}
+
 export const getUsersByGame = async (gameId) => {
   const auth = getAuth();
   const currentUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId')

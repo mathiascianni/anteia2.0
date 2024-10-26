@@ -7,7 +7,9 @@ import ListAdmin from './ListAdmin';
 const AdminGames = () => {
 
   return (
-    <ListAdmin table='games' addRoute='addgame' editRoute='editgame' title='Crear nuevo juego' secondTable='Usuarios' />
+    <div className='px-4'>
+      <ListAdmin table='games' addRoute='addgame' editRoute='editgame' title='Crear nuevo juego' secondTable='Usuarios' />
+    </div>
   );
 };
 

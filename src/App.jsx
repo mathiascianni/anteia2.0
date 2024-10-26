@@ -33,11 +33,11 @@ const App = () => {
     return (
         <div>
             <MainRoutes />
-            {showInstallButton && (
+            {/* {showInstallButton && (
                 <button onClick={handleInstallClick} className="install-button">
                     Instalar Aplicación
                 </button>
-            )}
+            )} */}
         </div>
     );
 };
