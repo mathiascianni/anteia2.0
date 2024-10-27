@@ -9,7 +9,7 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [userData, setUserData] = useState({});
+    const [userData, setUserData] = useState([]);
 
     const handleBackClick = () => {
         navigate(-1);
@@ -29,13 +29,12 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                     const notificationsRef = collection(userRef, 'notifications');
 
                     return onSnapshot(
-                        query(notificationsRef),
+                        query(notificationsRef, orderBy('timestamp', 'asc')),
                         snapshot => {
-                            console.log(snapshot)
                             const notiData = {};
                             snapshot.forEach(doc => {
                                 const data = doc.data();
-                                notiData[doc.id] = data;
+                                notiData[doc.id] = data; 
                             });
                             setNotifications(notiData);
                         }
@@ -112,11 +111,20 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                             </button>
                         </div>
                         {userData.length > 0 ? (
-                            userData.map((userInfo) => (
-                                <div key={userInfo.id}>
-                                    <Toast user={userInfo} />
-                                </div>
-                            ))
+                            userData.map((userInfo) =>
+                                userInfo.messages.map((msg, msgIndex) => (
+                                    <Toast
+                                        key={msgIndex}
+                                        user={userInfo}           
+                                        notification={{            
+                                            sender: userInfo.id, 
+                                            message: msg.message, 
+                                            status: msg.status 
+                                        }}
+                                        hour={new Date(msg.timestamp?.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    />
+                                ))
+                            )
                         ) : (
                             <p className="text-white font-bold bg-primary p-2">No hay notificaciones.</p>
                         )}
