@@ -1,9 +1,10 @@
 import { BackBtn, Bell } from "../../Icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { auth, getUserById, firestore as firebaseFirestore } from "../../credentials";
-import { collection, onSnapshot, doc } from "firebase/firestore";
+import { auth, getUserById, firestore } from "../../credentials";
+import { collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import Toast from "../Home/Toast";
+import Push from 'push.js';
 
 const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
     const navigate = useNavigate();
@@ -25,22 +26,34 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                 const user = auth.currentUser;
                 if (user) {
                     const userId = user.uid;
-                    const userRef = doc(firebaseFirestore, 'users', userId);
+                    const userRef = doc(firestore, 'users', userId);
                     const notificationsRef = collection(userRef, 'notifications');
 
-                    return onSnapshot(
-                        notificationsRef,
-                        snapshot => {
-                            const notiData = {};
-                            snapshot.forEach(doc => {
-                                const data = doc.data();
+                    return onSnapshot(notificationsRef, async (snapshot) => {
+                        const notiData = {};
+                        const promises = [];
+
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            const userSenderPromise = getUserById(doc.id).then(userSenderData => {
                                 if (!notiData[doc.id]) {
-                                    notiData[doc.id] = data; 
+                                    notiData[doc.id] = data;
+                                    console.log(userSenderData)
+                                    Push.create(userSenderData.displayName, {
+                                        body: 'te ha mandado un mensaje',
+                                        icon: userSenderData.photoURL,
+                                        onClick: async function () {
+                                            this.close();
+                                        }
+                                    });
                                 }
                             });
-                            setNotifications(notiData);
-                        }
-                    );
+                            promises.push(userSenderPromise);
+                        });
+
+                        await Promise.all(promises);
+                        setNotifications(notiData);
+                    });
                 } else {
                     console.error("Usuario no autenticado");
                 }
@@ -115,16 +128,10 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                         </div>
                         {userData.length > 0 ? (
                             userData.map((userInfo) => {
-                                const uniqueMessages = [...new Set(userInfo.messages.map(msg => msg.message))]; // Evitar mensajes duplicados
                                 return (
                                     <Toast
                                         key={userInfo.id}
                                         user={userInfo}
-                                        notification={{
-                                            sender: userInfo.id,
-                                            message: uniqueMessages.join(', '), // Mostrar todos los mensajes
-                                            status: userInfo.messages[0]?.status // Usar el estado del primer mensaje (o ajusta según sea necesario)
-                                        }}
                                         hour={new Date(userInfo.messages[0]?.timestamp?.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     />
                                 );

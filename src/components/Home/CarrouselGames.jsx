@@ -28,7 +28,7 @@ const CarrouselGames = () => {
                     <SwiperSlide key={game.id}>
                         <Link
                             to={`/game/${game.id}`}
-                            className='flex items-center w-16 h-16 rounded-full'
+                            className='flex items-center w-16 h-16 rounded-full border-2 border-white'
                             style={{ backgroundColor: game.color }}
                         >
                             <img className='w-8 mx-auto my-auto' src={game.icon} alt={game.title} />
