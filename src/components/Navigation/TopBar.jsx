@@ -2,7 +2,7 @@ import { BackBtn, Bell } from "../../Icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { auth, getUserById, firestore as firebaseFirestore } from "../../credentials";
-import { collection, orderBy, query, onSnapshot, doc } from "firebase/firestore";
+import { collection, onSnapshot, doc } from "firebase/firestore";
 import Toast from "../Home/Toast";
 
 const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
@@ -29,12 +29,14 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                     const notificationsRef = collection(userRef, 'notifications');
 
                     return onSnapshot(
-                        query(notificationsRef, orderBy('timestamp', 'asc')),
+                        notificationsRef,
                         snapshot => {
                             const notiData = {};
                             snapshot.forEach(doc => {
                                 const data = doc.data();
-                                notiData[doc.id] = data; 
+                                if (!notiData[doc.id]) {
+                                    notiData[doc.id] = data; 
+                                }
                             });
                             setNotifications(notiData);
                         }
@@ -52,7 +54,8 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
             const users = await Promise.all(
                 Object.keys(notifications).map(async (userId) => {
                     const user = await getUserById(userId);
-                    return { ...user, messages: notifications[userId].messages };
+                    const messages = notifications[userId]?.messages || [];
+                    return { ...user, messages };
                 })
             );
             setUserData(users);
@@ -91,7 +94,7 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                 )}
                 {title && <h1 className='text-2xl font-titles font-thin flex-1 text-center'>{title}</h1>}
 
-                {bell &&
+                {bell && (
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 block" onClick={handleBellClick}>
                         <Bell />
                         {Object.keys(notifications).length > 0 && (
@@ -100,7 +103,7 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                             </div>
                         )}
                     </div>
-                }
+                )}
                 {isModalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center z-50">
                         <div className="flex justify-end w-full px-4">
@@ -111,20 +114,21 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                             </button>
                         </div>
                         {userData.length > 0 ? (
-                            userData.map((userInfo) =>
-                                userInfo.messages.map((msg, msgIndex) => (
+                            userData.map((userInfo) => {
+                                const uniqueMessages = [...new Set(userInfo.messages.map(msg => msg.message))]; // Evitar mensajes duplicados
+                                return (
                                     <Toast
-                                        key={msgIndex}
-                                        user={userInfo}           
-                                        notification={{            
-                                            sender: userInfo.id, 
-                                            message: msg.message, 
-                                            status: msg.status 
+                                        key={userInfo.id}
+                                        user={userInfo}
+                                        notification={{
+                                            sender: userInfo.id,
+                                            message: uniqueMessages.join(', '), // Mostrar todos los mensajes
+                                            status: userInfo.messages[0]?.status // Usar el estado del primer mensaje (o ajusta según sea necesario)
                                         }}
-                                        hour={new Date(msg.timestamp?.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        hour={new Date(userInfo.messages[0]?.timestamp?.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     />
-                                ))
-                            )
+                                );
+                            })
                         ) : (
                             <p className="text-white font-bold bg-primary p-2">No hay notificaciones.</p>
                         )}
