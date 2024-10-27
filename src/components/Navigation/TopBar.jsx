@@ -7,7 +7,7 @@ import Toast from "../Home/Toast";
 
 const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
     const navigate = useNavigate();
-    const [notifications, setNotifications] = useState();
+    const [notifications, setNotifications] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [userData, setUserData] = useState({});
 
@@ -28,13 +28,16 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                     const userRef = doc(firebaseFirestore, 'users', userId);
                     const notificationsRef = collection(userRef, 'notifications');
 
-                    let notifications = [];
-
                     return onSnapshot(
-                        query(notificationsRef, orderBy('timestamp', 'asc')),
+                        query(notificationsRef),
                         snapshot => {
-                            notifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            setNotifications(notifications);
+                            console.log(snapshot)
+                            const notiData = {};
+                            snapshot.forEach(doc => {
+                                const data = doc.data();
+                                notiData[doc.id] = data;
+                            });
+                            setNotifications(notiData);
                         }
                     );
                 } else {
@@ -47,15 +50,15 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
 
     useEffect(() => {
         const fetchUsersData = async () => {
-            if (notifications) {
-                const users = await Promise.all(notifications.map(async (notification) => {
-                    const user = await getUserById(notification.sender);
-                    return user;
-                }));
-                setUserData(users);
-            }
-        }
-        fetchUsersData();
+            const users = await Promise.all(
+                Object.keys(notifications).map(async (userId) => {
+                    const user = await getUserById(userId);
+                    return { ...user, messages: notifications[userId].messages };
+                })
+            );
+            setUserData(users);
+        };
+        if (Object.keys(notifications).length > 0) fetchUsersData();
     }, [notifications]);
 
     return (
@@ -79,29 +82,27 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                         </div>
                         <div className="text-xs text-center">@{userChat.displayName}</div>
                     </Link>
-
                 )}
                 {icon && (
                     <img
                         className='text-primary absolute block left-0 top-1/2 -translate-y-1/2'
                         src="./assets/icon.svg"
                         alt="Anteia"
-                    >
-                    </img>
+                    />
                 )}
-
                 {title && <h1 className='text-2xl font-titles font-thin flex-1 text-center'>{title}</h1>}
 
                 {bell &&
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 block" onClick={handleBellClick}>
                         <Bell />
-                        {notifications && notifications.length > 0 && <div className="w-4 h-4 rounded-full bg-primary absolute bottom-3 left-3 flex items-center justify-center">
-                            <span className="text-white text-[12px]">{notifications.length}</span>
-                        </div>}
+                        {Object.keys(notifications).length > 0 && (
+                            <div className="w-4 h-4 rounded-full bg-primary absolute bottom-3 left-3 flex items-center justify-center">
+                                <span className="text-white text-[12px]">{Object.keys(notifications).length}</span>
+                            </div>
+                        )}
                     </div>
                 }
                 {isModalOpen && (
-
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center z-50">
                         <div className="flex justify-end w-full px-4">
                             <button
@@ -110,20 +111,20 @@ const TopBar = ({ backBtn, title, bell, icon, userChat }) => {
                                 X
                             </button>
                         </div>
-                        {notifications && notifications.length > 0 ? (
-                            notifications.map((notification, index) => (
-                                <Toast user={userData[index]} notification={notification} />
+                        {userData.length > 0 ? (
+                            userData.map((userInfo) => (
+                                <div key={userInfo.id}>
+                                    <Toast user={userInfo} />
+                                </div>
                             ))
                         ) : (
                             <p className="text-white font-bold bg-primary p-2">No hay notificaciones.</p>
                         )}
                     </div>
-
                 )}
             </div>
         </div>
-
     );
-}
+};
 
 export default TopBar;
