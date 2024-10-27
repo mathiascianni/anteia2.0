@@ -4,8 +4,10 @@ import { getAuth, updateEmail, updateProfile } from "firebase/auth";
 import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion, addDoc, orderBy, limit, arrayRemove } from 'firebase/firestore';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, uploadString, listAll } from 'firebase/storage';
-import { getDatabase, update } from "firebase/database";
+import { get, getDatabase, update } from "firebase/database";
 import { getDocs, where } from 'firebase/firestore';
+import Push from 'push.js';
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyB6RI-b-91E_sS7rsmIq8mRZVl2qHPOuf4",
@@ -177,22 +179,22 @@ export const uploadImageToStorage = async (imageData, displaName, fileName) => {
 
 export const getUrlsStorage = async (carpeta) => {
   try {
-      const storage = getStorage();
-      const folderRef = ref(storage, carpeta);
+    const storage = getStorage();
+    const folderRef = ref(storage, carpeta);
 
-      const archivos = await listAll(folderRef);
-      const urls = await Promise.all(
-          archivos.items.map(async (itemRef) => {
-              
-              const url = await getDownloadURL(itemRef);
-              return url;
-          })
-      );
+    const archivos = await listAll(folderRef);
+    const urls = await Promise.all(
+      archivos.items.map(async (itemRef) => {
 
-      return urls;
+        const url = await getDownloadURL(itemRef);
+        return url;
+      })
+    );
+
+    return urls;
   } catch (error) {
-      console.error("Error al obtener URLs de la carpeta:", error);
-      return [];
+    console.error("Error al obtener URLs de la carpeta:", error);
+    return [];
   }
 };
 
@@ -254,7 +256,7 @@ export const addDataArrayDB = async (data, path) => {
   const userRef = doc(firestore, 'users', userId);
   const userDoc = await getDoc(userRef);
 
-  
+
 
   if (!userDoc.exists()) {
     throw new Error('El documento del usuario no existe');
@@ -462,7 +464,7 @@ export async function getMatchsData() {
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
   const userRef = doc(firestore, 'users', userId);
   const userDoc = await getDoc(userRef);
-  
+
 
   if (!userDoc.exists()) {
     throw new Error('El documento del usuario no existe');
@@ -555,15 +557,36 @@ export const AddRecomendation = async (userLikedId) => {
   return userLiked;
 };
 
+
+
 export const sendNotification = async (message, currentUser, userSend, status) => {
   try {
-    await addDoc(collection(doc(firestore, 'users', userSend), 'notifications'), {
-      message,
-      sender: currentUser,
-      timestamp: new Date(),
-      status: status
-    });
-    console.log('Notificación enviada exitosamente.');
+    // Referencia al documento en la subcolección 'notifications' usando `currentUser` como ID
+    const notificationDocRef = doc(
+      firestore,
+      `users/${userSend}/notifications`,
+      currentUser
+    );
+
+    // Obtener el documento actual de notificación
+    const docSnapshot = await getDoc(notificationDocRef);
+    const existingMessages = docSnapshot.exists() ? docSnapshot.data().messages : [];
+
+    // Agregar el nuevo mensaje al array de mensajes existente
+    const updatedMessages = [
+      ...existingMessages,
+      {
+        message,
+        timestamp: new Date(),
+        status: status,
+      },
+    ];
+
+    // Guardar o actualizar el documento de notificación con el array completo de mensajes
+    await setDoc(notificationDocRef, { messages: updatedMessages }, { merge: true });
+
+    console.log('Notificación enviada exitosamente a Firestore.');
+
   } catch (error) {
     console.error('Error al enviar la notificación:', error);
   }
