@@ -1,26 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import Input from '../components/Auth/Input';
-import Checkbox from '../components/Auth/Checkbox';
+import UserCard from '../components/Home/UserCard';
 import { TopBar } from '../components/Navigation';
 import useRegister from '../hooks/useRegister';
 import { useNavigate } from 'react-router-dom';
-import { getUrlsStorage } from '../credentials';
+import { getDataDB, getUrlsStorage } from '../credentials';
 
 const Register = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); // Cambié el paso inicial a 1
   const [avatars, setAvatars] = useState([]);
   const [banners, setBanners] = useState([]);
   const [selectedAvatar, setSelectedAvatar] = useState('');
   const [selectedBanner, setSelectedBanner] = useState('');
+  const [selectedBorderColor, setSelectedBorderColor] = useState('');
+  const [selectedBackgroundColor, setSelectedBackgroundColor] = useState('');
+  const [colors, setColors] = useState([]);
 
   const {
     username,
     email,
     password,
     confirmPassword,
-    profileImageURL,
-    bannerImageURL,
+    border,
+    background,
     error,
     loading,
     handleUsernameChange,
@@ -29,6 +32,8 @@ const Register = () => {
     handleProfileImageChange,
     handleBannerImageChange,
     handleConfirmPasswordChange,
+    handleBackgroundChange,
+    handleBorderChange,
     handleSubmit,
     validateStep,
   } = useRegister();
@@ -36,12 +41,12 @@ const Register = () => {
   const handleAvatarSelect = (url) => {
     setSelectedAvatar(url);
     handleProfileImageChange(url);
-  }
+  };
 
   const handleBannerSelect = (url) => {
     setSelectedBanner(url);
     handleBannerImageChange(url);
-  }
+  };
 
   useEffect(() => {
     const fetchUrls = async () => {
@@ -49,8 +54,16 @@ const Register = () => {
       const bannersUrl = await getUrlsStorage('banners');
       setAvatars(avatarsUrl);
       setBanners(bannersUrl);
-    }
+    };
     fetchUrls();
+  }, []);
+
+  useEffect(() => {
+    const fetchColors = async () => {
+      const colorsData = await getDataDB('colors');
+      setColors(colorsData[0]?.color || []);
+    };
+    fetchColors();
   }, []);
 
   const handleNext = (e) => {
@@ -135,6 +148,46 @@ const Register = () => {
             </div>
           </>
         );
+      case 5:
+        return (
+          <>
+            <UserCard
+              user={{
+                photoURL: selectedAvatar,
+                displayName: username,
+                colors: {
+                  border: selectedBorderColor,
+                  background: selectedBackgroundColor,
+                }
+              }}
+            />
+            <p className='mb-4'>Selecciona tu Color de borde:</p>
+            <div className='grid grid-cols-4 gap-4'>
+              {colors.map((color, index) => (
+                <div
+                  key={index}
+                  onClick={() => setSelectedBorderColor(color)}
+                  onChange={() => handleBorderChange(color)}
+                  className={`w-20 h-20 rounded-full cursor-pointer transition-transform transform hover:scale-110 ${selectedBorderColor === color ? 'border-4 border-black' : ''}`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+            <p className='mb-4'>Selecciona tu Color de fondo:</p>
+            <div className='grid grid-cols-4 gap-4'>
+              {colors.map((color, index) => (
+                <div
+                  key={index}
+                  onClick={() => setSelectedBackgroundColor(color)}
+                  onChange={() => handleBackgroundChange(color)}
+                  className={`w-20 h-20 rounded-full cursor-pointer transition-transform transform hover:scale-110 ${selectedBackgroundColor === color ? 'border-4 border-black' : ''}`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+          </>
+        );
+
       default:
         return null;
     }
@@ -150,7 +203,7 @@ const Register = () => {
           {renderInputs()}
           {error && <p className="text-red-500 text-sm text-start mt-5">{error}</p>}
           <div className='flex flex-col fixed bottom-4 left-4 right-4'>
-            {step !== 1 && (
+            {step > 1 && (
               <button
                 type="button"
                 onClick={handlePrevious}
@@ -161,10 +214,10 @@ const Register = () => {
             )}
             <button
               type="button"
-              onClick={step === 4 ? handleSubmit : handleNext}
+              onClick={step === 5 ? handleSubmit : handleNext}
               className="text-white bg-primary w-full py-5 rounded-lg mb-4"
             >
-              {step === 4 ? 'Crear cuenta' : 'Continuar'}
+              {step === 5 ? 'Crear cuenta' : 'Continuar'}
             </button>
             <div className="w-full flex flex-col">
               <p className='text-center'>

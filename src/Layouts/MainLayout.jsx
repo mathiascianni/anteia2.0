@@ -16,10 +16,9 @@ const MainLayout = ({ children }) => {
   };
 
   useEffect(() => {
-    // Llamar la primera vez que se monta el componente
+   
     fetchBadgeData();
 
-    // Escuchar cambios en localStorage cuando se actualice 'badgeCondition' o 'badge'
     const handleStorageChange = (event) => {
       if (event.key === 'badgeCondition' || event.key === 'badge') {
         fetchBadgeData();
@@ -28,7 +27,7 @@ const MainLayout = ({ children }) => {
 
     window.addEventListener('storage', handleStorageChange);
 
-    // Limpiar el event listener al desmontar el componente
+ 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };

@@ -88,7 +88,10 @@ const SliderMatchs = () => {
                         }}
                     >
                         <div className='px-8'>
-                            <div className='card w-full bg-primary rounded-xl py-4'>
+                            <div className='card w-full rounded-xl py-4' style={{
+                                border: `4px solid ${users[currentIndex].colors.border}`,
+                                backgroundColor:users[currentIndex].colors.background,
+                            }}>
                                 <div className='w-[50%] mx-auto '>
                                     <img
                                         src={users[currentIndex].photoURL}
@@ -127,8 +130,9 @@ const SliderMatchs = () => {
 
             ) : (
                 <p>No hay usuarios disponibles</p>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 };
 
