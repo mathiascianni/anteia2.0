@@ -11,6 +11,8 @@ const useRegister = () => {
     const [profileImageURL, setProfileImageURL] = useState("");
     const [bannerImageURL, setBannerImageURL] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [borderColor, setBorderColor] = useState('')
+    const [backgroundColor, setBackgroundColor] = useState('')
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -29,7 +31,7 @@ const useRegister = () => {
     };
 
     const handleProfileImageChange = async (image) => {
-       setProfileImageURL(image)
+        setProfileImageURL(image)
     };
 
     const handleBannerImageChange = async (image) => {
@@ -38,6 +40,14 @@ const useRegister = () => {
 
     const handleConfirmPasswordChange = (e) => {
         setConfirmPassword(e.target.value);
+    };
+
+    const handleBorderChange = (color) => {
+        setBorderColor(color);
+    };
+
+    const handleBackgroundChange = (color) => {
+        setBackgroundColor(color);
     };
 
     const validateStep = (step) => {
@@ -83,7 +93,6 @@ const useRegister = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Validar último paso
         if (!validateStep(4)) return;
 
         try {
@@ -100,6 +109,7 @@ const useRegister = () => {
                 email: email,
                 badges: [],
                 games: [],
+                colors: { border: borderColor, background: backgroundColor },
                 recommendations: 0,
                 matchs: 0,
                 stars: 0,
@@ -136,8 +146,10 @@ const useRegister = () => {
         handleProfileImageChange,
         handleBannerImageChange,
         handleConfirmPasswordChange,
+        handleBorderChange,
+        handleBackgroundChange,
         handleSubmit,
-        validateStep, 
+        validateStep,
     };
 };
 
