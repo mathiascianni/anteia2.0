@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Star, EmptyStar } from '../../Icons'
+import { Star, EmptyStar, Gear } from '../../Icons'
 import { AddRecomendation } from '../../credentials'
 const ProfileHeader = ({ user, edit, like }) => {
     console.log(user)
@@ -12,11 +12,12 @@ const ProfileHeader = ({ user, edit, like }) => {
                 }}
             >
                 <div className="w-40 h-40 rounded-full absolute top-24 inset-0 mx-auto border-solid border-white border-8">
-                    <img className='w-40  rounded-full'
+                    <img className='w-40 rounded-full'
                         src={user.photoURL || 'assets/user/avatar.png'}
                         alt="User Profile"
                     />
-                    {edit && <Link to={'/profile/edit'} className='w-10 h-10 rounded-full bg-primary absolute right-0 -bottom-0 border-white border-2'>
+                    {edit && <Link to={'/profile/edit'} className='w-10 h-10 rounded-full bg-primary absolute right-0 -bottom-0 border-white border-2 flex justify-center items-center'>
+                    <Gear width='28px' height='28px'/>
                     </Link>}
                     {like && <div className='w-10 h-10 rounded-full bg-primary absolute right-0 -bottom-0 border-white border-2' onClick={() => AddRecomendation(user.id)}></div>}
                 </div>

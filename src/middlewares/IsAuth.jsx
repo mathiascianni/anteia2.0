@@ -1,36 +1,29 @@
 import { useState, useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { SpinnerLoader } from "../components/General";
 
 const IsAuth = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate()
-    const storedUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId')
-    useEffect(() => {
+    const navigate = useNavigate();
 
+    useEffect(() => {
+        const storedUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+        
         if (storedUserId) {
             setUser({ uid: storedUserId });
+        } else {
+            navigate('/login');
         }
-
-        if (!storedUserId) {
-            return navigate('/login');  ;
-        }
-
+        
         setLoading(false);
-    }, []);
+    }, [navigate]);
 
     if (loading) {
         return <SpinnerLoader />;
     }
 
-
-    if (!user) {
-        return navigate('/login');
-    }
-
-
-    return <>{children}</>;
+    return user ? <>{children}</> : null;
 };
 
 export default IsAuth;
