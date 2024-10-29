@@ -4,6 +4,7 @@ import { getDataDB, getUserById, searchBadgeForName } from "../credentials"
 import { useEffect, useState } from "react";
 import { SpinnerLoader } from "../components/General";
 import { Link } from "react-router-dom";
+import UserCard from "../components/Home/UserCard";
 
 const MyProfile = () => {
 	const [data, setData] = useState({});
@@ -13,7 +14,7 @@ const MyProfile = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-	
+
 			const userData = await getUserById(userId);
 			const badgesData = await getDataDB('badges');
 			setBadges(badgesData)
@@ -48,6 +49,10 @@ const MyProfile = () => {
 				<Stats user={data} />
 				<Badges user={data} badges={badges} />
 				<FavoriteGames user={data} />
+			</div>
+			<div className="px-4">
+				<h2 className='font-bold text-lg mb-2 '>Tu Card</h2>
+				<UserCard user={data} />
 			</div>
 		</div>
 	)

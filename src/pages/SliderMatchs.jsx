@@ -17,7 +17,7 @@ const SliderMatchs = () => {
     const auth = getAuth();
     const currentUserId = auth.currentUser ? auth.currentUser.uid : null;
     const navigate = useNavigate();
-
+    const whiteTextColors = ['#272727', '#225789', '#0066FF'];
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -28,12 +28,12 @@ const SliderMatchs = () => {
                     return followStatus !== 1 && user.id !== currentUserId ? user : null;
                 }));
 
-                // Filtra los usuarios nulos
+
                 setUsers(filteredUsers.filter(user => user !== null));
             } catch (error) {
                 console.error('Error fetching users:', error);
             } finally {
-                setLoading(false); // Finaliza el estado de carga
+                setLoading(false);
             }
         };
 
@@ -78,7 +78,7 @@ const SliderMatchs = () => {
             ) : users.length > 0 ? (
                 <div className='px-4'>
                     <div
-                        className='rounded-xl h-[calc(100vh-25vh)] pt-4 text-white'
+                        className={`rounded-xl h-[calc(100vh-25vh)] pt-4 ${whiteTextColors.includes(users[currentIndex].colors.background) ? 'text-white' : 'text-dark'}`}
                         ref={cardRef}
                         style={{
                             backgroundImage: `url(${users[currentIndex].banner})`,
@@ -90,7 +90,7 @@ const SliderMatchs = () => {
                         <div className='px-8'>
                             <div className='card w-full rounded-xl py-4' style={{
                                 border: `4px solid ${users[currentIndex].colors.border}`,
-                                backgroundColor:users[currentIndex].colors.background,
+                                backgroundColor: users[currentIndex].colors.background,
                             }}>
                                 <div className='w-[50%] mx-auto '>
                                     <img

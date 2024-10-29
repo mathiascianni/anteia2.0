@@ -43,10 +43,12 @@ const useRegister = () => {
     };
 
     const handleBorderChange = (color) => {
+        console.log(color)
         setBorderColor(color);
     };
 
     const handleBackgroundChange = (color) => {
+        console.log(color)
         setBackgroundColor(color);
     };
 

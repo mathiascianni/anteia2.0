@@ -8,7 +8,7 @@ import { getDataDB, getUrlsStorage } from '../credentials';
 
 const Register = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // Cambié el paso inicial a 1
+  const [step, setStep] = useState(1);
   const [avatars, setAvatars] = useState([]);
   const [banners, setBanners] = useState([]);
   const [selectedAvatar, setSelectedAvatar] = useState('');
@@ -22,18 +22,15 @@ const Register = () => {
     email,
     password,
     confirmPassword,
-    border,
-    background,
     error,
-    loading,
     handleUsernameChange,
     handleEmailChange,
     handlePasswordChange,
     handleProfileImageChange,
     handleBannerImageChange,
     handleConfirmPasswordChange,
-    handleBackgroundChange,
     handleBorderChange,
+    handleBackgroundChange,
     handleSubmit,
     validateStep,
   } = useRegister();
@@ -76,6 +73,16 @@ const Register = () => {
   const handlePrevious = (e) => {
     e.preventDefault();
     setStep(step - 1);
+  };
+
+  const handleBorderColorSelect = (color) => {
+    setSelectedBorderColor(color);
+    handleBorderChange(color);
+  };
+
+  const handleBackgroundColorSelect = (color) => {
+    setSelectedBackgroundColor(color);
+    handleBackgroundChange(color);
   };
 
   const renderInputs = () => {
@@ -166,8 +173,7 @@ const Register = () => {
               {colors.map((color, index) => (
                 <div
                   key={index}
-                  onClick={() => setSelectedBorderColor(color)}
-                  onChange={() => handleBorderChange(color)}
+                  onClick={() => handleBorderColorSelect(color)}
                   className={`w-20 h-20 rounded-full cursor-pointer transition-transform transform hover:scale-110 ${selectedBorderColor === color ? 'border-4 border-black' : ''}`}
                   style={{ backgroundColor: color }}
                 />
@@ -178,8 +184,7 @@ const Register = () => {
               {colors.map((color, index) => (
                 <div
                   key={index}
-                  onClick={() => setSelectedBackgroundColor(color)}
-                  onChange={() => handleBackgroundChange(color)}
+                  onClick={() => handleBackgroundColorSelect(color)}
                   className={`w-20 h-20 rounded-full cursor-pointer transition-transform transform hover:scale-110 ${selectedBackgroundColor === color ? 'border-4 border-black' : ''}`}
                   style={{ backgroundColor: color }}
                 />

@@ -20,6 +20,8 @@ import SliderMatchs from "../pages/SliderMatchs";
 import ProfileConf from "../pages/ProfileConf";
 import IsMatch from "../middlewares/IsMatch";
 import IsAdmin from "../middlewares/IsAdmin";
+import ProfileEditCard from "../pages/ProfileEditCard";
+import ProfileEditUser from "../pages/ProfileEditUser";
 
 
 const MainRoutes = () => {
@@ -32,6 +34,8 @@ const MainRoutes = () => {
       <Route path="/matchs" element={<IsAuth><MainLayout><SliderMatchs/></MainLayout></IsAuth>} />
       <Route path="/chats" element={<IsAuth><MainLayout><ListChats/></MainLayout></IsAuth>} />
       <Route path="/chats/:userId" element={<IsMatch><IsAuth><Chat /></IsAuth></IsMatch>} />
+      <Route path="/profile/edit/user" element={<IsAuth><MainLayout><ProfileEditUser /></MainLayout></IsAuth>} />
+      <Route path="/profile/edit/card" element={<IsAuth><MainLayout><ProfileEditCard /></MainLayout></IsAuth>} />
       <Route path="/profile/edit" element={<IsAuth><MainLayout><ProfileEdit /></MainLayout></IsAuth>} />
       <Route path="/profile/:uid" element={<IsAuth><MainLayout><Profile /></MainLayout></IsAuth>} />
       <Route path="/profile/:uid/configuration" element={<IsAuth><MainLayout><ProfileConf /></MainLayout></IsAuth>} />
