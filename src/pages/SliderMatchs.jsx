@@ -1,23 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { checkFollowStatus, createChat, getDataDB } from '../credentials';
+import { checkFollowStatus, createChat, createChatGroup, getDataDB } from '../credentials';
 import { TopBar } from '../components/Navigation';
 import { getAuth } from 'firebase/auth';
 import { Badge, EmptyStar, Heart, Star, Thumb } from '../Icons';
-import { FavoriteGames } from '../components/Profile';
-import IconGame from '../Icons/IconGame';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
 import { SpinnerLoader } from '../components/General';
 
 const SliderMatchs = () => {
+    const location = useLocation();
+    const navigate = useNavigate()
+    const { gameCountUser } = location.state || { gameCountUser: 1 };
     const [users, setUsers] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [selectedMatches, setSelectedMatches] = useState([]);
     const cardRef = useRef(null);
     const auth = getAuth();
     const currentUserId = auth.currentUser ? auth.currentUser.uid : null;
-    const navigate = useNavigate();
     const whiteTextColors = ['#272727', '#225789', '#0066FF'];
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -27,8 +29,6 @@ const SliderMatchs = () => {
                     const followStatus = await checkFollowStatus(user.id);
                     return followStatus !== 1 && user.id !== currentUserId ? user : null;
                 }));
-
-
                 setUsers(filteredUsers.filter(user => user !== null));
             } catch (error) {
                 console.error('Error fetching users:', error);
@@ -46,8 +46,18 @@ const SliderMatchs = () => {
         if (direction === 'right') {
             card.style.transition = 'transform 0.3s ease';
             card.style.transform = 'translateX(100%)';
-            await createChat(currentUserId, targetUserId);
-            navigate(`/profile/${targetUserId}`);
+
+            setSelectedMatches(prevMatches => {
+                const updatedMatches = [...prevMatches, users[currentIndex]];
+                if (updatedMatches.length >= gameCountUser && gameCountUser > 1) {
+                    console.log('Usuarios seleccionados:', updatedMatches);
+                    createChatGroup(updatedMatches, currentUserId);
+                    setSelectedMatches([]);
+                } else if (gameCountUser === 1) {
+                    createChat(currentUserId, targetUserId);
+                }
+                return updatedMatches;
+            });
         } else if (direction === 'left') {
             card.style.transition = 'transform 0.3s ease';
             card.style.transform = 'translateX(-100%)';
@@ -72,11 +82,31 @@ const SliderMatchs = () => {
     return (
         <div {...handlers}>
             <TopBar bell backBtn />
-
             {loading ? (
                 <SpinnerLoader />
             ) : users.length > 0 ? (
                 <div className='px-4'>
+                    {gameCountUser > 1 &&
+                        <div className='flex justify-center mb-4 gap-2'>
+                            {Array.from({ length: gameCountUser }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className='w-12 h-12 rounded-full overflow-hidden border border-gray-400'
+                                    style={{
+                                        backgroundColor: selectedMatches[i] ? 'transparent' : 'gray',
+                                    }}
+                                >
+                                    {selectedMatches[i] && (
+                                        <img
+                                            src={selectedMatches[i].photoURL}
+                                            alt={`Match ${i + 1}`}
+                                            className='w-full h-full object-cover'
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    }
                     <div
                         className={`rounded-xl h-[calc(100vh-25vh)] pt-4 ${whiteTextColors.includes(users[currentIndex].colors.background) ? 'text-white' : 'text-dark'}`}
                         ref={cardRef}
@@ -118,8 +148,8 @@ const SliderMatchs = () => {
                                     <div>
                                         <h3 className="text-md font-bold">Stats</h3>
                                         <ul>
-                                            <li className="flex items-center text-[12px] gap-1">Cantidad de matchs: <span className='text-white font-bold'>{users[currentIndex].matchs?.length || 0}</span></li>
-                                            <li className="flex items-center text-[12px] gap-1">Cantidad de likes: <span className='text-white font-bold'>{users[currentIndex].recommendations?.length || 0}</span></li>
+                                            <li className="flex items-center text-[12px] gap-1">matchs: <span className='text-white font-bold'>{users[currentIndex].matchs?.length || 0}</span></li>
+                                            <li className="flex items-center text-[12px] gap-1">likes: <span className='text-white font-bold'>{users[currentIndex].recommendations?.length || 0}</span></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -127,11 +157,9 @@ const SliderMatchs = () => {
                         </div>
                     </div>
                 </div>
-
             ) : (
                 <p>No hay usuarios disponibles</p>
-            )
-            }
+            )}
         </div >
     );
 };

@@ -380,6 +380,29 @@ export const createChat = async (currentUserId, userFollowId) => {
   console.log('Chat creado');
 }
 
+export const createChatGroup = async (usersArray, currentUserId) => {
+
+  const allUserIds = [...usersArray.map(user => user.id), currentUserId];
+  const groupId = allUserIds.sort().join('_');
+
+  const chatGroupRef = doc(firestore, 'chatGroups', groupId);
+  const chatGroupDoc = await getDoc(chatGroupRef);
+
+  if (chatGroupDoc.exists()) {
+    console.log('El chat grupal ya existe, no se creará uno nuevo.');
+    return false;
+  }
+
+  await setDoc(chatGroupRef, {
+    participants: allUserIds,
+    createdAt: new Date(),
+    messages: []
+  }, { merge: true });
+
+  console.log('Chat grupal creado');
+};
+
+
 export const checkFollowStatus = async (currentUserId, userFollowId) => {
   try {
     let chatRef = doc(firestore, 'chats', `${currentUserId}_${userFollowId}`);
