@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth, updateEmail, updateProfile } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, updateEmail, updateProfile } from "firebase/auth";
 import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion, addDoc, orderBy, limit, arrayRemove } from 'firebase/firestore';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, uploadString, listAll } from 'firebase/storage';
@@ -24,7 +24,7 @@ export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 export const storage = getStorage();
 export const firestore = getFirestore(app);
-
+export const provider = new GoogleAuthProvider();
 // Recupera datos del usuario por ID desde Firestore
 export async function getUserById(userId) {
   if (!userId) {
@@ -47,6 +47,7 @@ export async function getUserById(userId) {
     throw error;
   }
 }
+
 export const searchBadgeForName = async (badgeTitle) => {
   try {
     const badgesRef = collection(firestore, 'badges');
@@ -65,6 +66,22 @@ export const searchBadgeForName = async (badgeTitle) => {
       return null;
     }
   } catch (error) {
+    throw error;
+  }
+};
+
+//Iniciar sesion con Google
+export const loginWithGoogle = async () => {
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    console.log('Usuario logueado:', user);
+
+    return user;
+  } catch (error) {
+    console.error('Error al iniciar sesión con Google:', error);
     throw error;
   }
 };
@@ -362,6 +379,29 @@ export const createChat = async (currentUserId, userFollowId) => {
   await setDoc(chatRef, { participants: [currentUserId, userFollowId], [currentUserId]: true, [userFollowId]: false }, { merge: true });
   console.log('Chat creado');
 }
+
+export const createChatGroup = async (usersArray, currentUserId) => {
+
+  const allUserIds = [...usersArray.map(user => user.id), currentUserId];
+  const groupId = allUserIds.sort().join('_');
+
+  const chatGroupRef = doc(firestore, 'chatGroups', groupId);
+  const chatGroupDoc = await getDoc(chatGroupRef);
+
+  if (chatGroupDoc.exists()) {
+    console.log('El chat grupal ya existe, no se creará uno nuevo.');
+    return false;
+  }
+
+  await setDoc(chatGroupRef, {
+    participants: allUserIds,
+    createdAt: new Date(),
+    messages: []
+  }, { merge: true });
+
+  console.log('Chat grupal creado');
+};
+
 
 export const checkFollowStatus = async (currentUserId, userFollowId) => {
   try {
