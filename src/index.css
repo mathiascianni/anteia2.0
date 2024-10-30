@@ -2,22 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Importa la fuente en tu CSS si está en el proyecto */
+@font-face {
+  font-family: 'Peace Sans';
+  src: url('../public/fonts/PeaceSans.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 * {
-    font-family: 'Poppins';
+    font-family: 'Poppins', sans-serif;
+}
+
+.font-peace-sans {
+    font-family: 'Peace Sans', sans-serif;
 }
 
 .fade-in {
     animation: fadeIn 0.5s ease-in;
-  }
+}
   
-  @keyframes fadeIn {
+@keyframes fadeIn {
     from {
       opacity: 0;
     }
     to {
       opacity: 1;
     }
-  }
+}
 
 .fade-down {
     animation: fadeDown 0.5s ease-in;
@@ -60,4 +72,25 @@
     right: 0;
     bottom: 0;
     z-index: 0; 
+}  
+
+.presentacion {
+    position: relative;
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 10px;
+    display: inline-block;
+    margin-top: 1rem;
 }
+
+
+.presentacion::before {
+    content: "";
+    position: absolute;
+    bottom: -30px;
+    transform: translateX(-200%);
+    border-left: 10px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 30px solid #0066ff;
+}
+

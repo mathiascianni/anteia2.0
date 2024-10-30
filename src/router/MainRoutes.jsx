@@ -22,12 +22,14 @@ import IsMatch from "../middlewares/IsMatch";
 import IsAdmin from "../middlewares/IsAdmin";
 import ProfileEditCard from "../pages/ProfileEditCard";
 import ProfileEditUser from "../pages/ProfileEditUser";
+import Splash from "../pages/splash";
 
 
 const MainRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<IsAuth><MainLayout><Home /></MainLayout></IsAuth>} />
+      <Route path="/splash" element={<Splash />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<IsAuth><MainLayout><MyProfile /></MainLayout></IsAuth>} />

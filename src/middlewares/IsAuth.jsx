@@ -13,7 +13,7 @@ const IsAuth = ({ children }) => {
         if (storedUserId) {
             setUser({ uid: storedUserId });
         } else {
-            navigate('/login');
+            navigate('/splash');
         }
         
         setLoading(false);
