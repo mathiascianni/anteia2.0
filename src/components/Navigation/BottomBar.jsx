@@ -17,7 +17,6 @@ const BottomBar = () => {
                             :
                             <NavLink to={item.path} className="flex flex-col items-center justify-center">
                                 <item.icon />
-                                {/* <p className="uppercase text-xs">{item.title}</p> */}
                             </NavLink>
                         }
                     </Fragment>

@@ -49,7 +49,7 @@ const Home = () => {
 
   return (
     <div className="mx-auto">
-      <TopBar bell icon />
+      <TopBar bell icon backGround />
       <div>
         <UserList users={recommendations} title={'Usuarios Recomendados'} />
         <Banner />

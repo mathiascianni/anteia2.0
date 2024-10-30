@@ -47,7 +47,7 @@ const App = () => {
     return (
         <div>
             {showSplash ? (
-                <div className="fixed inset-0 flex items-center flex-col justify-center z-50 bg-primary">
+                <div className="fixed inset-0 flex items-center flex-col justify-center z-50 bg-gradient-to-br from-primary to-[#003BD3]">
                     <div className='circle-animate w-32 h-32 bg-white rounded-full absolute opacity-0'></div>
                     <img className='w-28 h-28 splash-img' src="./assets/iconWhite.svg" alt="Logo" />
                     <p className="splash-title text-white font-bold text-4xl">ANTEIA</p>
