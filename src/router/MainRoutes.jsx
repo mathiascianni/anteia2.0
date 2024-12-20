@@ -25,6 +25,7 @@ import ProfileEditUser from "../pages/ProfileEditUser";
 import Splash from "../pages/Splash";
 import Plans from "../pages/Plans";
 import Plan from "../pages/Plan";
+import Aprove from "../pages/Aprove";
 
 
 const MainRoutes = () => {
@@ -35,6 +36,7 @@ const MainRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       <Route path="/plans" element={<IsAuth><MainLayout><Plans /></MainLayout></IsAuth>} />
+      <Route path="/success" element={<IsAuth><MainLayout><Aprove /></MainLayout></IsAuth>} />
       <Route path="/plans/:planId" element={<IsAuth><MainLayout><Plan /></MainLayout></IsAuth>} />
       <Route path="/profile" element={<IsAuth><MainLayout><MyProfile /></MainLayout></IsAuth>} />
       <Route path="/matchs" element={<IsAuth><MainLayout><SliderMatchs/></MainLayout></IsAuth>} />

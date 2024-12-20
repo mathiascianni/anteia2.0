@@ -32,7 +32,7 @@ const Plans = () => {
               borderRadius: '8px',
               cursor: 'pointer', 
             }}
-            className="plan-card flex items-end relative h-[30vh] overflow-hidden"
+            className="plan-card flex items-end relative h-[210px] overflow-hidden"
           >
             <div>
               <div className='font-bold text-2xl'>Plan {plan.title}</div>

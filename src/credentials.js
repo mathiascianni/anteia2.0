@@ -96,22 +96,14 @@ export const searchBadgeForName = async (badgeTitle) => {
 
 export const loginWithGoogle = async () => {
   try {
-    // Iniciar sesión con Google
+
     console.log('Intentando iniciar sesión con Google...');
     const result = await signInWithPopup(auth, googleProvider);
-    
-    // Obtener los datos del usuario
+
     const user = result.user;
-    console.log('Usuario autenticado:', user);
 
     const { displayName, email, photoURL, uid } = user;
-    console.log('Datos del usuario obtenidos:');
-    console.log('displayName:', displayName);
-    console.log('email:', email);
-    console.log('photoURL:', photoURL);
-    console.log('uid:', uid);
 
-    // Crear objeto de datos de usuario para Firestore
     const userData = {
       displayName: displayName || "Nombre de Usuario",
       email: email,
@@ -121,27 +113,22 @@ export const loginWithGoogle = async () => {
       recommendations: 0,
       matchs: 0,
       stars: 0,
-      banner: '', 
+      banner: '',
       photoURL: photoURL || "https://firebasestorage.googleapis.com/v0/b/anteia-db.appspot.com/o/users%2Favatar.png?alt=media&token=1d387f13-2e06-40a1-966d-bb2c43506d4b",
       createdAt: new Date(),
       role: "user",
     };
-
-    // Imprimir los datos que se van a guardar en Firestore
+    const userDocRef = doc(firestore, "users", uid);
+    const userDocSnap = await getDoc(userDocRef);
     console.log('Datos que se guardarán en Firestore:', userData);
-
-    // Guardar los datos en Firestore
-    await setDoc(doc(firestore, "users", uid), userData);
-    console.log('Datos del usuario guardados en Firestore con UID:', uid);
-
-    // Guardar el UID en sessionStorage
+    if (!userDocSnap.exists()) {
+      await setDoc(doc(firestore, "users", uid), userData);
+      console.log('Datos del usuario guardados en Firestore con UID:', uid);
+    }
     sessionStorage.setItem('userId', uid);
-    console.log('UID guardado en sessionStorage:', uid);
-   
-    console.log('Redirigiendo al usuario...');
+    await completeBadges(uid, 'Bienvenido');
     return userData
   } catch (error) {
-    // Capturar y mostrar errores en caso de que haya un problema
     console.error('Error al iniciar sesión:', error);
     throw error;
   }
@@ -443,13 +430,13 @@ export const createChat = async (currentUserId, userFollowId) => {
 }
 
 export const createChatGroup = async (usersArray, currentUserId) => {
- 
+
   const participants = {};
 
   usersArray.forEach(user => {
-    participants[user.id] = false;  
+    participants[user.id] = false;
   });
-  
+
   participants[currentUserId] = true;
 
   const allUserIds = [...usersArray.map(user => user.id), currentUserId];
@@ -464,7 +451,7 @@ export const createChatGroup = async (usersArray, currentUserId) => {
   }
 
   await setDoc(chatGroupRef, {
-    participants: participants,  
+    participants: participants,
     createdAt: new Date(),
     messages: []
   }, { merge: true });
@@ -682,18 +669,18 @@ export const sendNotificationGroup = async (message, currentUser, userGroup, sta
 
 export const sendNotification = async (message, currentUser, userSend, status) => {
   try {
-   
+
     const notificationDocRef = doc(
       firestore,
       `users/${userSend}/notifications`,
       currentUser
     );
 
-    
+
     const docSnapshot = await getDoc(notificationDocRef);
     const existingMessages = docSnapshot.exists() ? docSnapshot.data().messages : [];
 
-   
+
     const updatedMessages = [
       ...existingMessages,
       {
@@ -703,7 +690,7 @@ export const sendNotification = async (message, currentUser, userSend, status) =
       },
     ];
 
-    
+
     await setDoc(notificationDocRef, { messages: updatedMessages }, { merge: true });
 
     console.log('Notificación enviada exitosamente a Firestore.');
