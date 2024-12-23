@@ -29,7 +29,6 @@ const AdminIndex = () => {
                     onChange={handleChange}
                 >
                     <option value="adminGames">Admin Games</option>
-                    <option value="adminPlans">Admin Planes</option>
                     <option value="dashboard">Dashboard</option>
                     <option value="users">Usuarios</option>
                 </select>
@@ -37,7 +36,6 @@ const AdminIndex = () => {
 
             {selectedComponent === 'adminGames' && <AdminGames />}
             {selectedComponent === 'dashboard' && <Dashboard />}
-            {selectedComponent === 'adminPlans' && <AdminPlans />}
             {selectedComponent === 'users' && <UserList users={users} search />}
         </div>
     );

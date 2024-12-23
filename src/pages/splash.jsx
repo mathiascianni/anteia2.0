@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { loginWithGoogle } from '../credentials';
 import gsap from 'gsap';
 
 const Splash = () => {
-    const navigate = useNavigate();
-
     useEffect(() => {
+
         gsap.fromTo(".presentacion",
             { opacity: 0, },
             { opacity: 1, delay: 1, duration: 1.2, ease: "power3.out" }
         );
+
 
         gsap.fromTo(".anthony-img",
             { x: -200, opacity: 0 },
@@ -22,8 +22,6 @@ const Splash = () => {
         try {
             const user = await loginWithGoogle();
             console.log('Usuario logueado:', user);
-            localStorage.setItem('googleUser', JSON.stringify(user)); 
-            navigate('/profile');
         } catch (error) {
             console.error('Error al iniciar sesión:', error);
         }
@@ -51,11 +49,13 @@ const Splash = () => {
                     </p>
                 </div>
 
+
                 <div className='px-8 text-center pt-8'>
                     <img src="./media/anthony/anthony_happy_2.png" className='w-24 anthony-img mx-auto' alt="Anthony" />
                 </div>
 
-                <div>
+
+                <div className='flex flex-col absolute left-0 right-0 bottom-10'>
                     <div className='grid grid-cols-2 px-4 gap-4'>
                         <Link className='px-4 text-center py-2 bg-white border-2 border-dark rounded-lg text-primary font-bold w-full' to={'/login'}>
                             Iniciar Sesión

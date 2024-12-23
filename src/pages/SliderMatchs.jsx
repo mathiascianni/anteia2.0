@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { checkFollowStatus, createChat, createChatGroup, getDataDB, sendNotificationGroup } from '../credentials';
+import { checkFollowStatus, createChat, createChatGroup, getDataDB } from '../credentials';
 import { TopBar } from '../components/Navigation';
 import { getAuth } from 'firebase/auth';
 import { Badge, EmptyStar, Heart, Star, Thumb } from '../Icons';
@@ -52,14 +52,9 @@ const SliderMatchs = () => {
                 if (updatedMatches.length >= gameCountUser && gameCountUser > 1) {
                     console.log('Usuarios seleccionados:', updatedMatches);
                     createChatGroup(updatedMatches, currentUserId);
-                    const message = "¡Has sido seleccionado para un chat grupal!";
-                    
-                    sendNotificationGroup(message, currentUserId, updatedMatches.map(user => user.id), "follow");
-                    navigate('/')
                     setSelectedMatches([]);
                 } else if (gameCountUser === 1) {
                     createChat(currentUserId, targetUserId);
-                    navigate(`/profile/${targetUserId}`)
                 }
                 return updatedMatches;
             });

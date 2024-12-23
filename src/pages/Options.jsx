@@ -22,7 +22,7 @@ const Options = () => {
         <TopBar title={'Opciones'}/>
         <div className='container px-4 my-4'>
             <ul>
-                <OptionItem text="Cerrar Sesión" link="/splash" onClick={handleLogout} />
+                <OptionItem text="Cerrar Sesión" link="/login" onClick={handleLogout} />
             </ul>
         </div>
         </>

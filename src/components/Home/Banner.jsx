@@ -13,7 +13,7 @@ const Banner = () => {
                     <li>Juega y diviértete</li>
                 </ul>
                 <div className='flex justify-end'>
-                    <Link to={'/plans'} className='bg-dark rounded-lg text-sm font-bold !mt-12 px-8 py-4'>¡Mirar Planes!</Link>
+                    <Link to={'/matchs'} className='bg-dark rounded-lg text-sm font-bold !mt-12 px-8 py-4'>¡Matchea ahora!</Link>
                 </div>
             </div>
         </div>

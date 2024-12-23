@@ -4,9 +4,9 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, updateEmail, updateProfil
 import { collection, query, onSnapshot, deleteDoc, updateDoc, arrayUnion, addDoc, orderBy, limit, arrayRemove } from 'firebase/firestore';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, uploadString, listAll } from 'firebase/storage';
+import { get, getDatabase, update } from "firebase/database";
 import { getDocs, where } from 'firebase/firestore';
-import { redirect } from "react-router-dom";
-
+import Push from 'push.js';
 
 
 const firebaseConfig = {
@@ -18,7 +18,7 @@ const firebaseConfig = {
   appId: "1:253082058484:web:56486ab70fa27360c7a8a1",
   measurementId: "G-DX85C4L2WS"
 };
-export const googleProvider = new GoogleAuthProvider();
+
 export const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
@@ -48,28 +48,6 @@ export async function getUserById(userId) {
   }
 }
 
-export async function getPlanById(planId) {
-  if (!planId) {
-    console.error('Plan es undefined o null');
-    return null;
-  }
-
-  try {
-    const planRef = doc(firestore, 'plans', planId);
-    const planDoc = await getDoc(planRef);
-
-    if (planDoc.exists()) {
-      return { id: planDoc.id, ...planDoc.data() };
-    } else {
-      console.log('No se encontró ningún Plan con el ID especificado:', planId);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error al obtener Plan por ID:', error);
-    throw error;
-  }
-}
-
 export const searchBadgeForName = async (badgeTitle) => {
   try {
     const badgesRef = collection(firestore, 'badges');
@@ -92,48 +70,21 @@ export const searchBadgeForName = async (badgeTitle) => {
   }
 };
 
-
-
+//Iniciar sesion con Google
 export const loginWithGoogle = async () => {
+
   try {
-
-    console.log('Intentando iniciar sesión con Google...');
-    const result = await signInWithPopup(auth, googleProvider);
-
+    const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    const { displayName, email, photoURL, uid } = user;
+    console.log('Usuario logueado:', user);
 
-    const userData = {
-      displayName: displayName || "Nombre de Usuario",
-      email: email,
-      badges: [],
-      games: [],
-      colors: { border: "#000", background: "#fff" },
-      recommendations: 0,
-      matchs: 0,
-      stars: 0,
-      banner: '',
-      photoURL: photoURL || "https://firebasestorage.googleapis.com/v0/b/anteia-db.appspot.com/o/users%2Favatar.png?alt=media&token=1d387f13-2e06-40a1-966d-bb2c43506d4b",
-      createdAt: new Date(),
-      role: "user",
-    };
-    const userDocRef = doc(firestore, "users", uid);
-    const userDocSnap = await getDoc(userDocRef);
-    console.log('Datos que se guardarán en Firestore:', userData);
-    if (!userDocSnap.exists()) {
-      await setDoc(doc(firestore, "users", uid), userData);
-      console.log('Datos del usuario guardados en Firestore con UID:', uid);
-    }
-    sessionStorage.setItem('userId', uid);
-    await completeBadges(uid, 'Bienvenido');
-    return userData
+    return user;
   } catch (error) {
-    console.error('Error al iniciar sesión:', error);
+    console.error('Error al iniciar sesión con Google:', error);
     throw error;
   }
 };
-
 
 // Cambia el estado de una insignia especificada para un usuario
 export const completeBadges = async (userId, badgeName) => {
@@ -431,14 +382,6 @@ export const createChat = async (currentUserId, userFollowId) => {
 
 export const createChatGroup = async (usersArray, currentUserId) => {
 
-  const participants = {};
-
-  usersArray.forEach(user => {
-    participants[user.id] = false;
-  });
-
-  participants[currentUserId] = true;
-
   const allUserIds = [...usersArray.map(user => user.id), currentUserId];
   const groupId = allUserIds.sort().join('_');
 
@@ -451,14 +394,13 @@ export const createChatGroup = async (usersArray, currentUserId) => {
   }
 
   await setDoc(chatGroupRef, {
-    participants: participants,
+    participants: allUserIds,
     createdAt: new Date(),
     messages: []
   }, { merge: true });
 
   console.log('Chat grupal creado');
 };
-
 
 
 export const checkFollowStatus = async (currentUserId, userFollowId) => {
@@ -655,32 +597,22 @@ export const AddRecomendation = async (userLikedId) => {
   return userLiked;
 };
 
-export const sendNotificationGroup = async (message, currentUser, userGroup, status) => {
-  try {
-    for (const userSend of userGroup) {
-      await sendNotification(message, currentUser, userSend, status);
-    }
 
-    console.log('Notificaciones enviadas exitosamente a todos los usuarios.');
-  } catch (error) {
-    console.error('Error al enviar las notificaciones al grupo:', error);
-  }
-};
 
 export const sendNotification = async (message, currentUser, userSend, status) => {
   try {
-
+    // Referencia al documento en la subcolección 'notifications' usando `currentUser` como ID
     const notificationDocRef = doc(
       firestore,
       `users/${userSend}/notifications`,
       currentUser
     );
 
-
+    // Obtener el documento actual de notificación
     const docSnapshot = await getDoc(notificationDocRef);
     const existingMessages = docSnapshot.exists() ? docSnapshot.data().messages : [];
 
-
+    // Agregar el nuevo mensaje al array de mensajes existente
     const updatedMessages = [
       ...existingMessages,
       {
@@ -690,7 +622,7 @@ export const sendNotification = async (message, currentUser, userSend, status) =
       },
     ];
 
-
+    // Guardar o actualizar el documento de notificación con el array completo de mensajes
     await setDoc(notificationDocRef, { messages: updatedMessages }, { merge: true });
 
     console.log('Notificación enviada exitosamente a Firestore.');
