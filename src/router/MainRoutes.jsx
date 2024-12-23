@@ -14,7 +14,7 @@ import Game from "../pages/Game";
 import MyProfile from "../pages/MyProfile";
 import ListChats from "../pages/ListChats";
 import Chat from "../pages/Chat";
-//Middlewares
+
 import IsAuth from "../middlewares/IsAuth";
 import SliderMatchs from "../pages/SliderMatchs";
 import ProfileConf from "../pages/ProfileConf";
@@ -22,7 +22,10 @@ import IsMatch from "../middlewares/IsMatch";
 import IsAdmin from "../middlewares/IsAdmin";
 import ProfileEditCard from "../pages/ProfileEditCard";
 import ProfileEditUser from "../pages/ProfileEditUser";
-import Splash from "../pages/splash";
+import Splash from "../pages/Splash";
+import Plans from "../pages/Plans";
+import Plan from "../pages/Plan";
+import Aprove from "../pages/Aprove";
 
 
 const MainRoutes = () => {
@@ -32,6 +35,9 @@ const MainRoutes = () => {
       <Route path="/splash" element={<Splash />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/plans" element={<IsAuth><MainLayout><Plans /></MainLayout></IsAuth>} />
+      <Route path="/success" element={<IsAuth><MainLayout><Aprove /></MainLayout></IsAuth>} />
+      <Route path="/plans/:planId" element={<IsAuth><MainLayout><Plan /></MainLayout></IsAuth>} />
       <Route path="/profile" element={<IsAuth><MainLayout><MyProfile /></MainLayout></IsAuth>} />
       <Route path="/matchs" element={<IsAuth><MainLayout><SliderMatchs/></MainLayout></IsAuth>} />
       <Route path="/chats" element={<IsAuth><MainLayout><ListChats/></MainLayout></IsAuth>} />
