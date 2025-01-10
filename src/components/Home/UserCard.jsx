@@ -18,7 +18,7 @@ const UserCard = ({ user }) => {
       <div>
         <img
           className='rounded-full w-16 border-4 border-white'
-          src={user.photoURL}
+          src={user.photoURL || 'assets/user/avatar.png'}
           alt={`Foto de perfil de ${user.displayName}`} 
         />
       </div>
